@@ -49,7 +49,7 @@ function qskFindClassnameBeforeLine(line: number, fallback = 'Q'): string {
   return fallback;
 }
 
-function qskMacroTransformation(macroname: string, transform: (skinnable: string, subcontrol: string, index: number, first: number, last: number) => string): void {
+function qskMacroTransformation(macroname: string, transform: (skinnable: string, macro: CppMacro) => string[]): void {
   const editor = vscode.window.activeTextEditor;
   if (editor) {
     const selection = editor.selection;
@@ -63,13 +63,11 @@ function qskMacroTransformation(macroname: string, transform: (skinnable: string
     // if surrounded text matches QSK_STATES declaration
     if (macro) {
       let skinnable = qskFindClassnameBeforeLine(selection.start.line, 'Q');
-
       let subcontrols = macro.parameters;
-      if (subcontrols.length > 0) {
-        let index = 0;
-        subcontrols = subcontrols.map(subcontrol => transform(skinnable, subcontrol, index++, 0, subcontrols.length - 1));
+      const lines = transform(skinnable, macro);
 
-        const textToCopy = subcontrols.join(document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
+      if (lines.length > 0) {
+        const textToCopy = lines.join(document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
         vscode.env.clipboard.writeText(textToCopy).then(() => {
           vscode.window.showInformationMessage('Copied to clipboard: ' + textToCopy);
         }, (error) => {
@@ -86,31 +84,29 @@ function activate(context: vscode.ExtensionContext): void {
   console.log('Congratulations, your extension "qskinny" is now active!');
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_subcontrols.qsk_subcontrol', () => {
-    qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, subcontrol, index) => `QSK_SUBCONTROL( ${skinnable}, ${subcontrol} )`);
+    qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_SUBCONTROL( ${skinnable}, ${subcontrol} )`));
   }));
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_subcontrols.qsk_subcontrols_if', () => {
-    qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, subcontrol, index) =>
-    ((index > 0 ? "else " : "") +
-      `if ( subControl == ${skinnable}::${subcontrol} )\n{\n}`)
-    );
+    let index = 0;
+    qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, macro) => macro.parameters.map(subcontrol => (index++ > 0 ? 'else ' : '') + `if ( subControl == ${skinnable}::${subcontrol} )\n{\n}`));
   }));
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_state', () => {
-    qskMacroTransformation('QSK_STATES', (skinnable, subcontrol, index) => `QSK_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstUserState << ${index} )`);
+    let index = 0;
+    qskMacroTransformation('QSK_STATES', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstUserState << ${index++} )`));
   }));
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_system_state', () => {
-    qskMacroTransformation('QSK_STATES', (skinnable, subcontrol, index) => `QSK_SYSTEM_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstSystemState << ${index} )`);
+    let index = 0;
+    qskMacroTransformation('QSK_STATES', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_SYSTEM_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstSystemState << ${index} )`));
   }));
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.subcontrols.noderoles', () => {
-    qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, subcontrol, index, first, last) => {
-      let line = '';
-      if (index === first) { line += 'enum NodeRole\n{\n'; }
-      line += `\t${ subcontrol },`;
-      if (index === last) { line += '\n};'; }
-      return line;
+    qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, macro) => {
+      return ['enum NodeRole', '{']
+        .concat(macro.parameters.map(subcontrol => `\t${subcontrol},`))
+        .concat(['};']);
     });
   }));
 }
