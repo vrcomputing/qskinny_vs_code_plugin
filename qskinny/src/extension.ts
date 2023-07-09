@@ -122,6 +122,8 @@ function qskMacroTransformation(macroname: string, transform: (skinnable: string
 function activate(context: vscode.ExtensionContext): void {
   console.log('Congratulations, your extension "qskinny" is now active!');
 
+  // qsk subcontrol transformations
+
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_subcontrols.qsk_subcontrol', () => {
     qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_SUBCONTROL( ${skinnable}, ${subcontrol} )`));
   }));
@@ -130,6 +132,16 @@ function activate(context: vscode.ExtensionContext): void {
     let index = 0;
     qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, macro) => macro.parameters.map(subcontrol => (index++ > 0 ? 'else ' : '') + `if ( subControl == ${skinnable}::${subcontrol} )\n{\n}`));
   }));
+
+  context.subscriptions.push(vscode.commands.registerCommand('qskinny.subcontrols.noderoles', () => {
+    qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, macro) => {
+      return ['enum NodeRole', '{']
+        .concat(macro.parameters.map(subcontrol => `\t${subcontrol},`))
+        .concat(['};']);
+    });
+  }));
+
+  // qsk states transformations
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_state', () => {
     let index = 0;
@@ -141,22 +153,45 @@ function activate(context: vscode.ExtensionContext): void {
     qskMacroTransformation('QSK_STATES', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_SYSTEM_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstSystemState << ${index} )`));
   }));
 
-  context.subscriptions.push(vscode.commands.registerCommand('qskinny.subcontrols.noderoles', () => {
-    qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, macro) => {
-      return ['enum NodeRole', '{']
-        .concat(macro.parameters.map(subcontrol => `\t${subcontrol},`))
-        .concat(['};']);
-    });
-  }));
+  // enum transformations 
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.switch', () => {
-    qskNodeRoleTransformation((skinlet, enumeration) => 
+    qskNodeRoleTransformation((skinlet, enumeration) =>
       [`switch(static_cast<${skinlet}::${enumeration.name}>(role))`, '{']
-      .concat(enumeration.enumerators.map(role => `\tcase ${skinlet}::${enumeration.name}::${role}:\n\t\tbreak;`)
-      .concat(['\tdefault:', '\t\tbreak;'])
-      .concat(['}'])
-      ));
+        .concat(enumeration.enumerators.map(role => `\tcase ${skinlet}::${enumeration.name}::${role}:\n\t\tbreak;`)
+          .concat(['\tdefault:', '\t\tbreak;'])
+          .concat(['}'])
+        ));
   }));
+
+  context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.template.subcontrol', () => {
+    qskNodeRoleTransformation((skinlet, enumeration) => [
+      `// TODO move to .h file`,
+      `template<${enumeration.name}>`,
+      `Q_REQUIRED_RESULT QSGNode* updateSubNode( const QskSkinnable* skinnable, QSGNode* node) const;`,
+      ``,
+      `// TODO move to .cpp file`,
+      `template<${enumeration.name}>`,
+      `QSGNode* ${skinlet}::updateSubNode( const QskSkinnable* skinnable, QSGNode* node) const = delete;`,
+      ``
+    ].concat(enumeration.enumerators.map(role => `template<>\nQSGNode* ${skinlet}::updateSubNode<${skinlet}::${enumeration.name}::${role}>( const QskSkinnable* skinnable, QSGNode* node) const\n{\n}\n`)
+    ));
+  }));
+
+  context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.template.switch', () => {
+    qskNodeRoleTransformation((skinlet, enumeration) =>
+      [
+        `QSGNode* ${skinlet}::updateSubNode( const QskSkinnable* skinnable, const quint8 role, QSGNode* const node ) const override;`,
+        `{`,
+        `switch( static_cast< ${skinlet}::${enumeration.name} >( role ) )`,
+        `{`
+      ]
+        .concat(enumeration.enumerators.map(role => `case ${skinlet}::${enumeration.name}::${role}: return updateSubNode<${skinlet}::${enumeration.name}::${role}>(skinnable, node);`))
+        .concat([`default: return Inherited::updateSubNode(skinnable, role, node);`, `}`, `}`])
+    );
+  }));
+
+
 }
 
 function deactivate(): void { }
