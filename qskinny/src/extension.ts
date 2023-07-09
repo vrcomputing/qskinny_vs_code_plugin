@@ -49,7 +49,7 @@ function qskFindClassnameBeforeLine(line: number, fallback = 'Q'): string {
   return fallback;
 }
 
-function qskStatesToQskState(transform: (skinnable: string, subcontrol: string, index: number) => string): void {
+function qskMacroTransformation(macroname: string, transform: (skinnable: string, subcontrol: string, index: number) => string): void {
   const editor = vscode.window.activeTextEditor;
   if (editor) {
     const selection = editor.selection;
@@ -58,7 +58,7 @@ function qskStatesToQskState(transform: (skinnable: string, subcontrol: string, 
     const document = editor.document;
 
     // TODO add multi line support
-    const macro = qskMacroParameters('QSK_STATES', surroundedText);
+    const macro = qskMacroParameters(macroname, surroundedText);
 
     // if surrounded text matches QSK_STATES declaration
     if (macro) {
@@ -85,12 +85,16 @@ function qskStatesToQskState(transform: (skinnable: string, subcontrol: string, 
 function activate(context: vscode.ExtensionContext): void {
   console.log('Congratulations, your extension "qskinny" is now active!');
 
+  context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_subcontrols.qsk_subcontrol', () => {
+    qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, subcontrol, index) => `QSK_SUBCONTROL( ${skinnable}, ${subcontrol} )`);
+  }));
+
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_states', () => {
-    qskStatesToQskState((skinnable, subcontrol, index) => `QSK_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstUserState << ${index} )`);
+    qskMacroTransformation('QSK_STATES', (skinnable, subcontrol, index) => `QSK_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstUserState << ${index} )`);
   }));
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_system_state', () => {
-    qskStatesToQskState((skinnable, subcontrol, index) => `QSK_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstSystemState << ${index} )`);
+    qskMacroTransformation('QSK_STATES', (skinnable, subcontrol, index) => `QSK_SYSTEM_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstSystemState << ${index} )`);
   }));
 }
 

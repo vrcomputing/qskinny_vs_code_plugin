@@ -14,13 +14,18 @@
   "contributes": {
     "commands": [
       {
+        "command": "qskinny.qsk_subcontrols.qsk_subcontrol",
+        "title": "QSK_SUBCONTROLS(...) => QSK_SUBCONTROL(..., ...)",
+        "description": "TODO"
+      },
+      {
         "command": "qskinny.qsk_states.qsk_states",
-        "title": "QSK_STATES(...) => QSK_STATE(..., ...)",
+        "title": "QSK_STATES(...) => QSK_STATE(..., ..., ...)",
         "description": "TODO"
       },
       {
         "command": "qskinny.qsk_states.qsk_system_state",
-        "title": "QSK_STATES(...) => QSK_SYSTEM_STATE(..., ...)",
+        "title": "QSK_STATES(...) => QSK_SYSTEM_STATE(..., ..., ...)",
         "description": "TODO"
       }
     ]
