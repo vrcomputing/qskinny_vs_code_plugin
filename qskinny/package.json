@@ -19,7 +19,7 @@
         "description": "TODO"
       },
       {
-        "command": "qskinny.qsk_states.qsk_states",
+        "command": "qskinny.qsk_states.qsk_state",
         "title": "QSK_STATES(...) => QSK_STATE(..., ..., ...)",
         "description": "TODO"
       },
