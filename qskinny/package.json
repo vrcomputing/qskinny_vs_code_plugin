@@ -24,6 +24,11 @@
         "description": "TODO"
       },
       {
+        "command": "qskinny.subcontrols.noderoles",
+        "title": "QSK_SUBCONTROLS(...) => enum NodeRole { ... }",
+        "description": "TODO"
+      },
+      {
         "command": "qskinny.qsk_states.qsk_state",
         "title": "QSK_STATES(...) => QSK_STATE(..., ..., ...)",
         "description": "TODO"

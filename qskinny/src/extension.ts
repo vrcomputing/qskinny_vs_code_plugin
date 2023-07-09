@@ -49,7 +49,7 @@ function qskFindClassnameBeforeLine(line: number, fallback = 'Q'): string {
   return fallback;
 }
 
-function qskMacroTransformation(macroname: string, transform: (skinnable: string, subcontrol: string, index: number) => string): void {
+function qskMacroTransformation(macroname: string, transform: (skinnable: string, subcontrol: string, index: number, first: number, last: number) => string): void {
   const editor = vscode.window.activeTextEditor;
   if (editor) {
     const selection = editor.selection;
@@ -67,7 +67,7 @@ function qskMacroTransformation(macroname: string, transform: (skinnable: string
       let subcontrols = macro.parameters;
       if (subcontrols.length > 0) {
         let index = 0;
-        subcontrols = subcontrols.map(subcontrol => transform(skinnable, subcontrol, index++));
+        subcontrols = subcontrols.map(subcontrol => transform(skinnable, subcontrol, index++, 0, subcontrols.length - 1));
 
         const textToCopy = subcontrols.join(document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
         vscode.env.clipboard.writeText(textToCopy).then(() => {
@@ -102,6 +102,16 @@ function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_system_state', () => {
     qskMacroTransformation('QSK_STATES', (skinnable, subcontrol, index) => `QSK_SYSTEM_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstSystemState << ${index} )`);
+  }));
+
+  context.subscriptions.push(vscode.commands.registerCommand('qskinny.subcontrols.noderoles', () => {
+    qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, subcontrol, index, first, last) => {
+      let line = '';
+      if (index === first) { line += 'enum NodeRole\n{\n'; }
+      line += `\t${ subcontrol },`;
+      if (index === last) { line += '\n};'; }
+      return line;
+    });
   }));
 }
 
