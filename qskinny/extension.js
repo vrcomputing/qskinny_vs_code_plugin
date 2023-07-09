@@ -28,6 +28,35 @@ function qskMacroParameters(name, line) {
 	return macro;
 }
 
+/**
+ * 
+ * @param {int} line The line number in the active document
+ * @param {string} fallback The name to return if the search fails
+ * @returns Returns the first class or struct's name declared before @p line
+ */
+function qskFindClassnameBeforeLine(line, fallback = 'Q') {
+
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+		return fallback;
+	}
+	const document = editor.document;
+	if (!document) {
+		return fallback;
+	}
+
+	// find candidate for the class name
+	for (let lineNumber = line - 1; lineNumber > 0; lineNumber--) {
+		const lineText = document.lineAt(lineNumber).text;
+		let match = lineText.match(/(?:class|struct).*\s+(\w+)\s*:/)
+		if (match) {
+			skinnable = match[1].trim();
+			return skinnable;
+		}
+	}
+	return fallback;
+}
+
 function qskStatesToQskState(transform) {
 	const editor = vscode.window.activeTextEditor;
 	if (editor) {
@@ -36,23 +65,12 @@ function qskStatesToQskState(transform) {
 		const surroundedText = editor.document.getText(range);
 		const document = editor.document;
 
+		// TODO add multi line support
 		const macro = qskMacroParameters('QSK_STATES', surroundedText);
 
 		// if surrounded text matches QSK_STATES declaration
 		if (macro) {
-
-			// TODO optionally show the user an input
-			let skinnable = 'Q'
-
-			// find candidate for the class name
-			for (let lineNumber = selection.start.line - 1; lineNumber > 0; lineNumber--) {
-				const lineText = document.lineAt(lineNumber).text;
-				let match = lineText.match(/(?:class|struct).*\s+(\w+)\s*:/)
-				if (match) {
-					skinnable = match[1].trim();
-					break;
-				}
-			}
+			let skinnable = qskFindClassnameBeforeLine(selection.start.line, 'Q');
 
 			let subcontrols = macro.parameters;
 			if (subcontrols.length > 0) {
