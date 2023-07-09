@@ -5,6 +5,29 @@ const vscode = require('vscode');
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 
+class CppMacro {
+	constructor(name, parameters) {
+		this.name = name;
+		this.parameters = parameters;
+	}
+}
+
+/**
+ * @param name Pattern of the macros's name
+ * @param line The line as string to seach for the macro
+ * @returns Returns an instance of a CppMacro
+ */
+function qskMacroParameters(name, line) {
+	const regex = new RegExp(`^(${name})\s*\\((.*)\\)$`);
+	const match = line.match(regex);
+	if (!match) {
+		return null;
+	}
+
+	let macro = new CppMacro(match[1].trim(), match[2].split(',').map(s => s.trim()));
+	return macro;
+}
+
 function qskStatesToQskState(transform) {
 	const editor = vscode.window.activeTextEditor;
 	if (editor) {
@@ -13,11 +36,10 @@ function qskStatesToQskState(transform) {
 		const surroundedText = editor.document.getText(range);
 		const document = editor.document;
 
-		const regex = /QSK_STATES\s*\((.*)\)/;
-		const match = surroundedText.match(regex);
-		
+		const macro = qskMacroParameters('QSK_STATES', surroundedText);
+
 		// if surrounded text matches QSK_STATES declaration
-		if (match) {
+		if (macro) {
 
 			// TODO optionally show the user an input
 			let skinnable = 'Q'
@@ -32,7 +54,7 @@ function qskStatesToQskState(transform) {
 				}
 			}
 
-			let subcontrols = match[1].split(',').map(s => s.trim());
+			let subcontrols = macro.parameters;
 			if (subcontrols.length > 0) {
 				let index = 0;
 				subcontrols = subcontrols.map(subcontrol => transform(skinnable, subcontrol, index++));
