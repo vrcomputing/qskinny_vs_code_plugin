@@ -15,27 +15,27 @@
     "commands": [
       {
         "command": "qskinny.qsk_subcontrols.qsk_subcontrol",
-        "title": "QSK_SUBCONTROLS(...) => QSK_SUBCONTROL(..., ...)",
+        "title": "QSK: QSK_SUBCONTROLS(...) => QSK_SUBCONTROL(..., ...)",
         "description": "TODO"
       },
       {
         "command": "qskinny.qsk_subcontrols.qsk_subcontrols_if",
-        "title": "QSK_SUBCONTROLS(...) => if( subControl == ...)",
+        "title": "QSK: QSK_SUBCONTROLS(...) => if( subControl == ...)",
         "description": "TODO"
       },
       {
         "command": "qskinny.subcontrols.noderoles",
-        "title": "QSK_SUBCONTROLS(...) => enum NodeRole { ... }",
+        "title": "QSK: QSK_SUBCONTROLS(...) => enum NodeRole { ... }",
         "description": "TODO"
       },
       {
         "command": "qskinny.qsk_states.qsk_state",
-        "title": "QSK_STATES(...) => QSK_STATE(..., ..., ...)",
+        "title": "QSK: QSK_STATES(...) => QSK_STATE(..., ..., ...)",
         "description": "TODO"
       },
       {
-        "command": "qskinny.qsk_states.qsk_system_state",
-        "title": "QSK_STATES(...) => QSK_SYSTEM_STATE(..., ..., ...)",
+        "command": "qskinny.noderoles.switch",
+        "title": "QSK: enum NodeRole => switch(...)",
         "description": "TODO"
       }
     ]

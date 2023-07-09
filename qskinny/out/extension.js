@@ -8,6 +8,12 @@ class CppMacro {
         this.parameters = parameters;
     }
 }
+class CppEnumeration {
+    constructor(name, enumerators) {
+        this.name = name;
+        this.enumerators = enumerators;
+    }
+}
 /**
  * @param name Pattern of the macros's name
  * @param line The line as string to seach for the macro
@@ -48,6 +54,37 @@ function qskFindClassnameBeforeLine(line, fallback = 'Q') {
     }
     return fallback;
 }
+function qskNodeRoleTransformation(transform) {
+    const editor = vscode.window.activeTextEditor;
+    if (editor) {
+        const selection = editor.selection;
+        const range = new vscode.Range(selection.start, selection.end);
+        const selectedLines = [];
+        for (let lineNumber = selection.start.line; lineNumber <= selection.end.line; lineNumber++) {
+            const lineText = editor.document.lineAt(lineNumber).text;
+            selectedLines.push(lineText);
+        }
+        const line = selectedLines.join('');
+        const match = line.match(/enum\s+(\w+)\s*\{(.*)\}/);
+        if (match) {
+            const name = match[1];
+            const enumerators = match[2].split(',').map(s => s.trim().split('=')[0].trim());
+            console.log(enumerators);
+            const enumeration = new CppEnumeration(name, enumerators);
+            let skinlet = qskFindClassnameBeforeLine(selection.start.line, 'Q');
+            const lines = transform(skinlet, enumeration);
+            const textToCopy = lines.join(editor.document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
+            vscode.env.clipboard.writeText(textToCopy).then(() => {
+                vscode.window.showInformationMessage('Copied to clipboard: ' + textToCopy);
+            }, (error) => {
+                vscode.window.showErrorMessage('Failed to copy to clipboard: ' + error);
+            });
+        }
+        else {
+            vscode.window.showErrorMessage(`Invalid enum declaration!`);
+        }
+    }
+}
 function qskMacroTransformation(macroname, transform) {
     const editor = vscode.window.activeTextEditor;
     if (editor) {
@@ -72,7 +109,7 @@ function qskMacroTransformation(macroname, transform) {
             }
         }
         else {
-            vscode.window.showErrorMessage(`"${surroundedText}" doesn't match QSK_STATES(...) declaration!`);
+            vscode.window.showErrorMessage(`Invalid "${macroname}" declaration!`);
         }
     }
 }
@@ -99,6 +136,12 @@ function activate(context) {
                 .concat(macro.parameters.map(subcontrol => `\t${subcontrol},`))
                 .concat(['};']);
         });
+    }));
+    context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.switch', () => {
+        qskNodeRoleTransformation((skinlet, enumeration) => [`switch(static_cast<${skinlet}::${enumeration.name}>(role))`, '{']
+            .concat(enumeration.enumerators.map(role => `\tcase ${skinlet}::${enumeration.name}::${role}:\n\t\tbreak;`)
+            .concat(['\tdefault:', '\t\tbreak;'])
+            .concat(['}'])));
     }));
 }
 exports.activate = activate;
