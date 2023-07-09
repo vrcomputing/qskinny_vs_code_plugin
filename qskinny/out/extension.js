@@ -149,8 +149,8 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.template.subcontrol', () => {
         qskNodeRoleTransformation((skinlet, enumeration) => [
             `// TODO move to .h file`,
-            `template<${enumeration.name}>`,
-            `Q_REQUIRED_RESULT QSGNode* updateSubNode( const QskSkinnable* skinnable, QSGNode* node) const;`,
+            `template<${skinlet}::${enumeration.name}>`,
+            `QSGNode* updateSubNode( const QskSkinnable* skinnable, QSGNode* node) const;`,
             ``,
             `// TODO move to .cpp file`,
             `template<${enumeration.name}>`,
