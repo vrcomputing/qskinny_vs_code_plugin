@@ -21,8 +21,13 @@
         "description": "TODO"
       },
       {
-        "command": "qskinny.qsk_states",
+        "command": "qskinny.qsk_states.qsk_states",
         "title": "QSK_STATES(...) => QSK_STATE(..., ...)",
+        "description": "TODO"
+      },
+      {
+        "command": "qskinny.qsk_states.qsk_system_state",
+        "title": "QSK_STATES(...) => QSK_SYSTEM_STATE(..., ...)",
         "description": "TODO"
       }
     ]

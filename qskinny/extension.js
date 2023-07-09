@@ -5,7 +5,7 @@ const vscode = require('vscode');
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 
-function qskStatesToQskState() {
+function qskStatesToQskState(transform) {
 	const editor = vscode.window.activeTextEditor;
 	if (editor) {
 		const selection = editor.selection;
@@ -26,26 +26,27 @@ function qskStatesToQskState() {
 			for (let lineNumber = selection.start.line - 1; lineNumber > 0; lineNumber--) {
 				const lineText = document.lineAt(lineNumber).text;
 				let match = lineText.match(/(?:class|struct).*\s+(\w+)\s*:/)
-				if(match)
-				{
+				if (match) {
 					skinnable = match[1].trim();
 					break;
 				}
 			}
 
-			let i = 0;
-			let subcontrols = match[1].split(',').map(s => s.trim())
-			subcontrols = subcontrols.map(s => `QSK_STATE( ${skinnable}, ${s}, QskAspect::FirstUserState << ${i++} )`)
+			let subcontrols = match[1].split(',').map(s => s.trim());
+			if (subcontrols.length > 0) {
+				let index = 0;
+				subcontrols = subcontrols.map(subcontrol => transform(skinnable, subcontrol, index++));
 
-			// if subcontrols list is not empty
-			if (i > 0) {
-				textToCopy = subcontrols.join('\n')
+				textToCopy = subcontrols.join(document.eol)
 				vscode.env.clipboard.writeText(textToCopy).then(() => {
 					vscode.window.showInformationMessage('Copied to clipboard: ' + textToCopy);
 				}, (error) => {
 					vscode.window.showErrorMessage('Failed to copy to clipboard: ' + error);
 				});
 			}
+		}
+		else {
+			vscode.window.showErrorMessage(`"${surroundedText}" doesn't match QSK_STATES(...) declaration!`);
 		}
 	}
 }
@@ -60,9 +61,11 @@ function activate(context) {
 	context.subscriptions.push(vscode.commands.registerCommand('qskinny.helloWorld', function () {
 		// vscode.window.showInformationMessage('Hello World from qskinny!');
 	}));
-	context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states', function () {
-		// vscode.window.showInformationMessage('Hello World from qskinny!');
-		qskStatesToQskState();
+	context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_states', function () {
+		qskStatesToQskState((skinnable, subcontrol, index) => `QSK_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstUserState << ${index} )`);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_system_state', function () {
+		qskStatesToQskState((skinnable, subcontrol, index) => `QSK_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstSystemState << ${index} )`);
 	}));
 }
 
