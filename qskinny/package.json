@@ -12,7 +12,7 @@
   "activationEvents": [
     "onLanguage:cpp"
   ],
-  "main": "./extension.js",
+  "main": "./extension.ts",
   "contributes": {
     "commands": [
       {
