@@ -19,6 +19,11 @@
         "description": "TODO"
       },
       {
+        "command": "qskinny.qsk_subcontrols.qsk_subcontrols_if",
+        "title": "QSK_SUBCONTROLS(...) => if( subControl == ...)",
+        "description": "TODO"
+      },
+      {
         "command": "qskinny.qsk_states.qsk_state",
         "title": "QSK_STATES(...) => QSK_STATE(..., ..., ...)",
         "description": "TODO"

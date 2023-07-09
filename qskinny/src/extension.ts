@@ -89,6 +89,13 @@ function activate(context: vscode.ExtensionContext): void {
     qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, subcontrol, index) => `QSK_SUBCONTROL( ${skinnable}, ${subcontrol} )`);
   }));
 
+  context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_subcontrols.qsk_subcontrols_if', () => {
+    qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, subcontrol, index) =>
+    ((index > 0 ? "else " : "") +
+      `if ( subControl == ${skinnable}::${subcontrol} )\n{\n}`)
+    );
+  }));
+
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_state', () => {
     qskMacroTransformation('QSK_STATES', (skinnable, subcontrol, index) => `QSK_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstUserState << ${index} )`);
   }));
