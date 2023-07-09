@@ -12,6 +12,73 @@ For example if there is an image subfolder under your extension project workspac
 
 > Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
 
+## Commands
+
+### QSK: QSK_SUBCONTROLS(...) - Input
+
+```cpp
+QSK_SUBCONTROLS( Overlay, Panel, Segment, Cursor, Text, Icon, Separator )
+```
+
+### QSK: QSK_SUBCONTROLS(...) => QSK_SUBCONTROL(..., ...) - Output
+
+```cpp
+QSK_SUBCONTROL( QskMenu, Overlay )
+QSK_SUBCONTROL( QskMenu, Panel )
+QSK_SUBCONTROL( QskMenu, Segment )
+QSK_SUBCONTROL( QskMenu, Cursor )
+QSK_SUBCONTROL( QskMenu, Text )
+QSK_SUBCONTROL( QskMenu, Icon )
+QSK_SUBCONTROL( QskMenu, Separator )
+```
+
+### QSK: QSK_SUBCONTROLS(...) => if( subControl == ...) - Output
+
+```cpp
+if ( subControl == QskMenu::Overlay ){}
+else if ( subControl == QskMenu::Panel ){}
+else if ( subControl == QskMenu::Segment ){}
+else if ( subControl == QskMenu::Cursor ){}
+else if ( subControl == QskMenu::Text ){}
+else if ( subControl == QskMenu::Icon ){}
+else if ( subControl == QskMenu::Separator ){}
+```
+
+### QSK: QSK_SUBCONTROLS(...) => enum NodeRole { ... }
+
+```cpp
+enum NodeRole
+{
+	Overlay,
+	Panel,
+	Segment,
+	Cursor,
+	Text,
+	Icon,
+	Separator,
+};
+```
+
+### QSK: QSK_STATES(...) - Input
+
+```cpp
+QSK_STATES( Checked, Pressed )
+```
+
+### QSK: QSK_STATES(...) => QSK_STATE(..., ..., ...) - Output
+
+```cpp
+QSK_STATE( QskAbstractButton, Checked, QskAspect::FirstUserState << 0 )
+QSK_STATE( QskAbstractButton, Pressed, QskAspect::FirstUserState << 1 )
+```
+
+### QSK: QSK_STATES(...) => QSK_SYSTEM_STATE(..., ..., ...) - Output
+
+```cpp
+QSK_SYSTEM_STATE( QskAbstractButton, Checked, QskAspect::FirstSystemState << 0 )
+QSK_SYSTEM_STATE( QskAbstractButton, Pressed, QskAspect::FirstSystemState << 0 )
+```
+
 ## Requirements
 
 If you have any requirements or dependencies, add a section describing those and how to install and configure them.

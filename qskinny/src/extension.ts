@@ -136,7 +136,7 @@ function activate(context: vscode.ExtensionContext): void {
     qskMacroTransformation('QSK_STATES', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstUserState << ${index++} )`));
   }));
 
-  context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_system_state', () => {
+  context.subscriptions.push(vscode.commands.registerCommand('qskinny.states.systemstate', () => {
     let index = 0;
     qskMacroTransformation('QSK_STATES', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_SYSTEM_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstSystemState << ${index} )`));
   }));
