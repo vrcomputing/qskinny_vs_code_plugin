@@ -79,6 +79,65 @@ QSK_SYSTEM_STATE( QskAbstractButton, Checked, QskAspect::FirstSystemState << 0 )
 QSK_SYSTEM_STATE( QskAbstractButton, Pressed, QskAspect::FirstSystemState << 0 )
 ```
 
+### QSK: enum NodeRole - Input
+
+```cpp
+enum NodeRole
+{
+    PanelRole,
+    SplashRole,
+    TextRole,
+    IconRole,
+    RoleCount
+};
+```
+
+### QSK: enum NodeRole => template<NodeRole> - Output
+
+```cpp
+// TODO move to .h file
+template<NodeRole>
+Q_REQUIRED_RESULT QSGNode* updateSubNode( const QskSkinnable* skinnable, QSGNode* node) const;
+
+// TODO move to .cpp file
+template<NodeRole>
+QSGNode* QskPushButtonSkinlet::updateSubNode( const QskSkinnable* skinnable, QSGNode* node) const = delete;
+
+template<>
+QSGNode* QskPushButtonSkinlet::updateSubNode<QskPushButtonSkinlet::NodeRole::PanelRole>( const QskSkinnable* skinnable, QSGNode* node) const{}
+
+template<>
+QSGNode* QskPushButtonSkinlet::updateSubNode<QskPushButtonSkinlet::NodeRole::SplashRole>( const QskSkinnable* skinnable, QSGNode* node) const{}
+
+template<>
+QSGNode* QskPushButtonSkinlet::updateSubNode<QskPushButtonSkinlet::NodeRole::TextRole>( const QskSkinnable* skinnable, QSGNode* node) const{}
+
+template<>
+QSGNode* QskPushButtonSkinlet::updateSubNode<QskPushButtonSkinlet::NodeRole::IconRole>( const QskSkinnable* skinnable, QSGNode* node) const{}
+
+template<>
+QSGNode* QskPushButtonSkinlet::updateSubNode<QskPushButtonSkinlet::NodeRole::RoleCount>( const QskSkinnable* skinnable, QSGNode* node) const{}
+
+```
+
+### QSK: enum NodeRole => switch(...) template<NodeRole> - Output
+
+```cpp
+QSGNode* QskPushButtonSkinlet::updateSubNode( const QskSkinnable* const skinnable, const quint8 role, QSGNode* const node ) const override;
+{
+	using R = QskPushButtonSkinlet::NodeRole;
+	switch( static_cast< QskPushButtonSkinlet::NodeRole >( role ) )
+	{
+		case R::PanelRole: return updateSubNode<R::PanelRole>(skinnable, node);
+		case R::SplashRole: return updateSubNode<R::SplashRole>(skinnable, node);
+		case R::TextRole: return updateSubNode<R::TextRole>(skinnable, node);
+		case R::IconRole: return updateSubNode<R::IconRole>(skinnable, node);
+		case R::RoleCount: return updateSubNode<R::RoleCount>(skinnable, node);
+		default: return Inherited::updateSubNode(skinnable, role, node);
+	}
+}
+```
+
 ## Requirements
 
 If you have any requirements or dependencies, add a section describing those and how to install and configure them.

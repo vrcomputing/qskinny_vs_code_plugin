@@ -156,17 +156,18 @@ function activate(context) {
             `template<${enumeration.name}>`,
             `QSGNode* ${skinlet}::updateSubNode( const QskSkinnable* skinnable, QSGNode* node) const = delete;`,
             ``
-        ].concat(enumeration.enumerators.map(role => `template<>\nQSGNode* ${skinlet}::updateSubNode<${skinlet}::${enumeration.name}::${role}>( const QskSkinnable* skinnable, QSGNode* node) const\n{\n}\n`)));
+        ].concat(enumeration.enumerators.map(role => `template<>\nQSGNode* ${skinlet}::updateSubNode<${skinlet}::${enumeration.name}::${role}>( const QskSkinnable* const skinnable, QSGNode* node) const\n{\n}\n`)));
     }));
     context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.template.switch', () => {
         qskNodeRoleTransformation((skinlet, enumeration) => [
-            `QSGNode* ${skinlet}::updateSubNode( const QskSkinnable* skinnable, const quint8 role, QSGNode* const node ) const override;`,
+            `QSGNode* ${skinlet}::updateSubNode( const QskSkinnable* const skinnable, const quint8 role, QSGNode* const node ) const override;`,
             `{`,
-            `switch( static_cast< ${skinlet}::${enumeration.name} >( role ) )`,
-            `{`
+            `\tusing R = ${skinlet}::${enumeration.name};`,
+            `\tswitch( static_cast< ${skinlet}::${enumeration.name} >( role ) )`,
+            `\t{`
         ]
-            .concat(enumeration.enumerators.map(role => `case ${skinlet}::${enumeration.name}::${role}: return updateSubNode<${skinlet}::${enumeration.name}::${role}>(skinnable, node);`))
-            .concat([`default: return Inherited::updateSubNode(skinnable, role, node);`, `}`, `}`]));
+            .concat(enumeration.enumerators.map(role => `\t\tcase R::${role}: return updateSubNode<R::${role}>(skinnable, node);`))
+            .concat([`\t\tdefault: return Inherited::updateSubNode(skinnable, role, node);`, `\t}`, `}`]));
     }));
 }
 exports.activate = activate;
