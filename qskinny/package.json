@@ -14,11 +14,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "qskinny.helloWorld",
-        "title": "Hello World",
-        "description": "TODO"
-      },
-      {
         "command": "qskinny.qsk_states.qsk_states",
         "title": "QSK_STATES(...) => QSK_STATE(..., ...)",
         "description": "TODO"

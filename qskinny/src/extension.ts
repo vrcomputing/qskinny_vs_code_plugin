@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 class CppMacro {
-  constructor(public name: string, public parameters: string[]) {}
+  constructor(public name: string, public parameters: string[]) { }
 }
 
 /**
@@ -69,7 +69,7 @@ function qskStatesToQskState(transform: (skinnable: string, subcontrol: string, 
         let index = 0;
         subcontrols = subcontrols.map(subcontrol => transform(skinnable, subcontrol, index++));
 
-        const textToCopy = subcontrols.join(document.eol == vscode.EndOfLine.CRLF ? '\r\n' : '\n');
+        const textToCopy = subcontrols.join(document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
         vscode.env.clipboard.writeText(textToCopy).then(() => {
           vscode.window.showInformationMessage('Copied to clipboard: ' + textToCopy);
         }, (error) => {
@@ -85,10 +85,6 @@ function qskStatesToQskState(transform: (skinnable: string, subcontrol: string, 
 function activate(context: vscode.ExtensionContext): void {
   console.log('Congratulations, your extension "qskinny" is now active!');
 
-  context.subscriptions.push(vscode.commands.registerCommand('qskinny.helloWorld', () => {
-    // vscode.window.showInformationMessage('Hello World from qskinny!');
-  }));
-
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_states', () => {
     qskStatesToQskState((skinnable, subcontrol, index) => `QSK_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstUserState << ${index} )`);
   }));
@@ -98,7 +94,7 @@ function activate(context: vscode.ExtensionContext): void {
   }));
 }
 
-function deactivate(): void {}
+function deactivate(): void { }
 
 export {
   activate,
