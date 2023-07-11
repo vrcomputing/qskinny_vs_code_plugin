@@ -10,6 +10,16 @@ For example if there is an image subfolder under your extension project workspac
 
 \!\[feature X\]\(images/feature-x.png\)
 
+![](./doc/r1.gif)
+![](./doc/r2.gif)
+![](./doc/r3.gif)
+![](./doc/r4.gif)
+![](./doc/r5.gif)
+![](./doc/r6.gif)
+![](./doc/r7.gif)
+![](./doc/r8.gif)
+![](./doc/r9.gif)
+
 > Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
 
 ## Commands
