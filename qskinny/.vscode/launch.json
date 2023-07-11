@@ -6,6 +6,14 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "Python Script",
+			"type": "python",
+			"request": "launch",
+			"program": "${file}",
+			"console": "integratedTerminal",
+			"args": ["C:/Users/vrick/Pictures/Tinder/DSC05245.JPG"]
+		},
+		{
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",
@@ -13,7 +21,8 @@
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/out/**/*.js",
+				"${workspaceFolder}/out/extension.js"
 			],
 			"preLaunchTask": "${defaultBuildTask}"
 		},

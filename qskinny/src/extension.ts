@@ -8,6 +8,19 @@ class CppEnumeration {
   constructor(public name: string, public enumerators: string[]) { }
 }
 
+class MyCodeActionProvider implements vscode.CodeActionProvider {
+  provideCodeActions(document: vscode.TextDocument, range: vscode.Range): vscode.CodeAction[] {
+    const diagnostic = new vscode.Diagnostic(range, 'This is a warning message', vscode.DiagnosticSeverity.Warning);
+
+    const fixAction = new vscode.CodeAction('Fix warning', vscode.CodeActionKind.QuickFix);
+    fixAction.diagnostics = [diagnostic];
+    fixAction.isPreferred = true;
+    fixAction.edit = new vscode.WorkspaceEdit();
+    fixAction.edit.insert(document.uri, range.start, 'Q_INVOKABLE ');
+    return [fixAction];
+  }
+}
+
 /**
  * @param name Pattern of the macros's name
  * @param line The line as string to seach for the macro
@@ -29,12 +42,7 @@ function qskMacroParameters(name: string, line: string): CppMacro | null {
  * @param fallback The name to return if the search fails
  * @returns Returns the first class or struct's name declared before @p line
  */
-function qskFindClassnameBeforeLine(line: number, fallback = 'Q'): string {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) {
-    return fallback;
-  }
-  const document = editor.document;
+function qskFindClassnameBeforeLine(line: number, document: vscode.TextDocument, fallback = 'Q'): string {
   if (!document) {
     return fallback;
   }
@@ -73,7 +81,7 @@ function qskNodeRoleTransformation(transform: (skinnable: string, enumeration: C
       console.log(enumerators);
       const enumeration = new CppEnumeration(name, enumerators);
 
-      let skinlet = qskFindClassnameBeforeLine(selection.start.line, 'Q');
+      let skinlet = qskFindClassnameBeforeLine(selection.start.line, editor.document, 'Q');
       const lines = transform(skinlet, enumeration);
       const textToCopy = lines.join(editor.document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
       vscode.env.clipboard.writeText(textToCopy).then(() => {
@@ -101,8 +109,7 @@ function qskMacroTransformation(macroname: string, transform: (skinnable: string
 
     // if surrounded text matches QSK_STATES declaration
     if (macro) {
-      let skinnable = qskFindClassnameBeforeLine(selection.start.line, 'Q');
-      let subcontrols = macro.parameters;
+      const skinnable = qskFindClassnameBeforeLine(selection.start.line, editor.document, 'Q');
       const lines = transform(skinnable, macro);
 
       if (lines.length > 0) {
@@ -122,6 +129,88 @@ function qskMacroTransformation(macroname: string, transform: (skinnable: string
 function activate(context: vscode.ExtensionContext): void {
   console.log('Congratulations, your extension "qskinny" is now active!');
 
+  const diagnosticCollection = vscode.languages.createDiagnosticCollection('Opened Header Problems');
+  let activeEditor = vscode.window.activeTextEditor;
+
+  const codeActionProvider = new MyCodeActionProvider();
+  context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ scheme: 'file' }, codeActionProvider));
+
+  function updateDiagnostics(document: vscode.TextDocument) {
+    const diagnostics: vscode.Diagnostic[] = [];
+
+    let certainty = 0.0;
+    if (document.fileName.match(/.*Skinlet.*/)) {
+      certainty += 0.1;
+    }
+
+    let classname = '';
+    for (let lineIndex = 0; lineIndex < document.lineCount; ++lineIndex) {
+      const line = document.lineAt(lineIndex);
+      if (line.text.match(/:.*QskSkinlet.*/)) {
+        certainty += 0.33;
+      }
+      if (line.text.match(/.*Q_GADGET.*/)) {
+        certainty += 0.33;
+        classname = qskFindClassnameBeforeLine(line.lineNumber, document, 'Q');
+        if (classname.match(/.*Skinlet.*/)) {
+          certainty += 0.2;
+        }
+      }
+    }
+
+    if (certainty > 0.66) {
+      for (let lineIndex = 0; lineIndex < document.lineCount; ++lineIndex) {
+        const line = document.lineAt(lineIndex);
+        if (line.text.match(/\w+\s*\(\s*QskSkin\s*\*.*\)/) && !line.text.match(/.*Q_INVOKABLE.*/)) {
+          // Create the diagnostic for the opened file
+          const range = new vscode.Range(new vscode.Position(line.lineNumber, line.text.indexOf(classname)), new vscode.Position(line.lineNumber, line.text.length));
+          const diagnostic = new vscode.Diagnostic(range, `(${certainty * 100}%) Missing Q_INVOKABLE?`, vscode.DiagnosticSeverity.Warning);
+          diagnostics.push(diagnostic);
+        }
+      }
+
+      // Update the diagnostics for the opened file
+      diagnosticCollection.set(document.uri, diagnostics);
+    }
+  }
+
+  function onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
+    const document = event.document;
+    if (document.languageId === 'cpp' || document.languageId === 'c') {
+      const fileExt = document.fileName.split('.').pop();
+      if (fileExt === 'h') {
+        updateDiagnostics(document);
+      }
+    }
+  }
+
+  function onDidChangeActiveTextEditor(editor: vscode.TextEditor | undefined) {
+    if (editor) {
+      const document = editor.document;
+      if (document.languageId === 'cpp' || document.languageId === 'c') {
+        const fileExt = document.fileName.split('.').pop();
+        if (fileExt === 'h') {
+          updateDiagnostics(document);
+        }
+      }
+    }
+  }
+
+  if (activeEditor) {
+    const document = activeEditor.document;
+    if (document.languageId === 'cpp' || document.languageId === 'c') {
+      const fileExt = document.fileName.split('.').pop();
+      if (fileExt === 'h') {
+        updateDiagnostics(document);
+      }
+    }
+  }
+
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor),
+    vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument)
+  );
+
   // qsk subcontrol transformations
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_subcontrols.qsk_subcontrol', () => {
@@ -137,7 +226,7 @@ function activate(context: vscode.ExtensionContext): void {
     qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, macro) => {
       return ['enum NodeRole', '{']
         .concat(macro.parameters.map(subcontrol => `\t${subcontrol},`))
-        .concat(['};']);
+        .concat(['\tRoleCount', '};']);
     });
   }));
 
@@ -192,7 +281,125 @@ function activate(context: vscode.ExtensionContext): void {
     );
   }));
 
+  context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.template.tutorial', () => {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders || workspaceFolders?.length <= 0) {
+      vscode.window.showErrorMessage('No active workspace found');
+      return;
+    }
+    const workspaceFolder = workspaceFolders[0].uri;
 
+    const titles = [
+      "Step 1/4: Create skinnable's header file",
+      "Step 2/4: Create skinnable's source file",
+      "Step 3/4: Create skinlets's header file",
+      "Step 4/4: Create skinlets's source file"
+    ];
+
+    vscode.window.showInputBox({ title: titles[0], prompt: 'Enter skinnable name', placeHolder: 'e.g. ExampleControl', value: 'ExampleControl', validateInput: text => (text.match(/\w+/) ? "" : 'Must not be empty (a-zA-Z_)!') }).then(skinnable => {
+      const skinnableHpp = vscode.Uri.file(`${workspaceFolder.fsPath}/${skinnable}.h`);
+      const skinnableCpp = vscode.Uri.file(`${workspaceFolder.fsPath}/${skinnable}.cpp`);
+      const skinletHpp = vscode.Uri.file(`${workspaceFolder.fsPath}/${skinnable}Skinlet.h`);
+      const skinletCpp = vscode.Uri.file(`${workspaceFolder.fsPath}/${skinnable}Skinlet.cpp`);
+      vscode.workspace.openTextDocument(skinnableHpp.with({ scheme: 'untitled' })).then(doc => {
+        vscode.window.showTextDocument(doc).then(editor => {
+          const lines = [
+            '#pragma once',
+            '',
+            '#include <QskControl.h>',
+            '',
+            'class ${1:' + skinnable + '} : public QskControl',
+            '{',
+            '\texplicit ${1:' + skinnable + '}( QQuickItem* parent = nullptr );',
+            '};',
+          ];
+          const snippet = new vscode.SnippetString(lines.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
+          editor.insertSnippet(snippet, new vscode.Position(0, 0));
+          vscode.workspace.onDidSaveTextDocument((savedDocument) => {
+            if (savedDocument.uri.toString() === skinnableHpp.toString()) {
+              vscode.window.showInformationMessage(`Completed ${titles[0]}`);
+              vscode.workspace.openTextDocument(skinnableCpp.with({ scheme: 'untitled' })).then(doc => {
+                vscode.window.showTextDocument(doc).then(editor => {
+                  const lines = [
+                    '#include "${1:' + skinnable + '}.h"',
+                    '',
+                    '${1:' + skinnable + '}::${1:' + skinnable + '}( QQuickItem* const parent) : QskControl( parent )',
+                    '{',
+                    '}',
+                    '',
+                    '#include "moc_${1:' + skinnable + '}.cpp"',
+                  ];
+                  const snippet = new vscode.SnippetString(lines.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
+                  editor.insertSnippet(snippet, new vscode.Position(0, 0));
+                  vscode.workspace.onDidSaveTextDocument((savedDocument) => {
+                    if (savedDocument.uri.toString() === skinnableCpp.toString()) {
+                      vscode.window.showInformationMessage(`Completed ${titles[1]}`);
+                      vscode.workspace.openTextDocument(skinletHpp.with({ scheme: 'untitled' })).then(doc => {
+                        vscode.window.showTextDocument(doc).then(editor => {
+                          const lines = [
+                            '#pragma once',
+                            'class ${1:' + skinnable + '}Skinlet : public QskSkinlet',
+                            '{',
+                            '\tQ_GADGET',
+                            'public:',
+                            '\tenum NodeRole',
+                            '\t{',
+                            '\t\tRoleCount',
+                            '\t};',
+                            '',
+                            '\tQ_INVOKABLE ${1:' + skinnable + '}Skinlet( QskSkin* skin = nullptr );',
+                            '};',
+                          ];
+                          const snippet = new vscode.SnippetString(lines.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
+                          editor.insertSnippet(snippet, new vscode.Position(0, 0));
+
+                          // create an output channel
+                          // const outputChannel = vscode.window.createOutputChannel('Error List');
+                          // outputChannel.appendLine('Hello World');
+                          // outputChannel.show(true);
+
+                          // const diagnosticCollection = vscode.languages.createDiagnosticCollection('My Problems');
+                          // const range = new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 10));
+                          // const diagnostic = new vscode.Diagnostic(range, 'This is a problem message', vscode.DiagnosticSeverity.Error);
+                          // diagnosticCollection.set(skinletHpp, [diagnostic]);
+
+                          vscode.workspace.onDidSaveTextDocument((savedDocument) => {
+                            if (savedDocument.uri.toString() === skinletHpp.toString()) {
+                              vscode.window.showInformationMessage(`Completed ${titles[2]}`);
+                              vscode.workspace.openTextDocument(skinletCpp.with({ scheme: 'untitled' })).then(doc => {
+                                vscode.window.showTextDocument(doc).then(editor => {
+                                  const lines = [
+                                    '#include "${1:' + skinnable + '}Skinlet.h"',
+                                    ``,
+                                    '${1:' + skinnable + '}Skinlet( QskSkin* const skin = nullptr ) : QskSkinlet( skin )',
+                                    `{`,
+                                    `}`
+                                  ];
+                                  const snippet = new vscode.SnippetString(lines.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
+                                  editor.insertSnippet(snippet, new vscode.Position(0, 0));
+                                  vscode.workspace.onDidSaveTextDocument((savedDocument) => {
+                                    if (savedDocument.uri.toString() === skinletCpp.toString()) {
+                                      vscode.window.showInformationMessage(`Completed ${titles[3]}`);
+                                    }
+                                  });
+                                });
+                              });
+                            }
+                          });
+                        });
+                      });
+                    }
+                  });
+                });
+              });
+            }
+          });
+        });
+      },
+        err => vscode.window.showErrorMessage(`Failed to open "${skinnableHpp.fsPath}": ${err}`)
+      );
+    });
+  }));
 }
 
 function deactivate(): void { }

@@ -9,7 +9,10 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:cpp",
+    "onLanguage:c"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -52,6 +55,25 @@
         "command": "qskinny.noderoles.template.switch",
         "title": "QSK: enum NodeRole => switch(...) template<NodeRole>",
         "description": "TODO"
+      },
+      {
+        "command": "qskinny.noderoles.template.tutorial",
+        "title": "QSK: Skinnable + Skinlet",
+        "description": "TODO"
+      }
+    ],
+    "languages": [
+      {
+        "id": "cpp",
+        "extensions": [
+          ".h"
+        ]
+      },
+      {
+        "id": "c",
+        "extensions": [
+          ".h"
+        ]
       }
     ]
   },
