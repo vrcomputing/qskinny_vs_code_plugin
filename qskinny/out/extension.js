@@ -50,7 +50,7 @@ function qskFindClassnameBeforeLine(line, document, fallback = 'Q') {
     }
     let skinnable = fallback;
     // find candidate for the class name
-    for (let lineNumber = line - 1; lineNumber > 0; lineNumber--) {
+    for (let lineNumber = line - 1; lineNumber >= 0; lineNumber--) {
         const lineText = document.lineAt(lineNumber).text;
         const match = lineText.match(/(?:class|struct).*\s+(\w+)\s*:/);
         if (match) {

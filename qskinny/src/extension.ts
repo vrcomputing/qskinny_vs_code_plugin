@@ -50,9 +50,9 @@ function qskFindClassnameBeforeLine(line: number, document: vscode.TextDocument,
   let skinnable = fallback;
 
   // find candidate for the class name
-  for (let lineNumber = line - 1; lineNumber > 0; lineNumber--) {
+  for (let lineNumber = line - 1; lineNumber >= 0; lineNumber--) {
     const lineText = document.lineAt(lineNumber).text;
-    const match = lineText.match(/(?:class|struct).*\s+(\w+)\s*:/);
+    const match = lineText.match(/.*(?:class|struct).*\s+(\w+)\s*:.*/);
     if (match) {
       skinnable = match[1].trim();
       return skinnable;
