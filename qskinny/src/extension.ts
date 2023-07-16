@@ -252,7 +252,13 @@ function activate(context: vscode.ExtensionContext): void {
         ));
   }));
 
+  // enum advanced commands
+
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.template.subcontrol', () => {
+    if (!vscode.workspace.getConfiguration('qskinny').get<boolean>('advancedCommands')) {
+      vscode.window.showWarningMessage("Advanced commands not activated! See: 'qskinny.advancedCommands: true'");
+      return;
+    }
     qskNodeRoleTransformation((skinlet, enumeration) => [
       `// TODO move to .h file`,
       `template<${skinlet}::${enumeration.name}>`,
@@ -267,6 +273,10 @@ function activate(context: vscode.ExtensionContext): void {
   }));
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.template.switch', () => {
+    if (!vscode.workspace.getConfiguration('qskinny').get<boolean>('advancedCommands')) {
+      vscode.window.showWarningMessage("Advanced commands not activated! See: 'qskinny.advancedCommands: true'");
+      return;
+    }
     qskNodeRoleTransformation((skinlet, enumeration) =>
       [
         `QSGNode* ${skinlet}::updateSubNode( const QskSkinnable* const skinnable, const quint8 role, QSGNode* const node ) const override;`,
@@ -279,6 +289,8 @@ function activate(context: vscode.ExtensionContext): void {
         .concat([`\t\tdefault: return Inherited::updateSubNode(skinnable, role, node);`, `\t}`, `}`])
     );
   }));
+
+  // tutorials
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.template.tutorial', () => {
     const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -351,16 +363,6 @@ function activate(context: vscode.ExtensionContext): void {
                           ];
                           const snippet = new vscode.SnippetString(lines.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
                           editor.insertSnippet(snippet, new vscode.Position(0, 0));
-
-                          // create an output channel
-                          // const outputChannel = vscode.window.createOutputChannel('Error List');
-                          // outputChannel.appendLine('Hello World');
-                          // outputChannel.show(true);
-
-                          // const diagnosticCollection = vscode.languages.createDiagnosticCollection('My Problems');
-                          // const range = new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 10));
-                          // const diagnostic = new vscode.Diagnostic(range, 'This is a problem message', vscode.DiagnosticSeverity.Error);
-                          // diagnosticCollection.set(skinletHpp, [diagnostic]);
 
                           vscode.workspace.onDidSaveTextDocument((savedDocument) => {
                             if (savedDocument.uri.toString() === skinletHpp.toString()) {

@@ -49,17 +49,17 @@
       {
         "command": "qskinny.noderoles.template.subcontrol",
         "title": "QSK: enum NodeRole => template<NodeRole>",
-        "description": "TODO"
+        "description": "(Advanced Command) Creates empty updateSubNode<NodeRole> function for each node role"
       },
       {
         "command": "qskinny.noderoles.template.switch",
         "title": "QSK: enum NodeRole => switch(...) template<NodeRole>",
-        "description": "TODO"
+        "description": "(Advanced Command) Creates a switch case statement returning updateSubNode<NodeRole> for each node role"
       },
       {
         "command": "qskinny.noderoles.template.tutorial",
         "title": "QSK: Skinnable + Skinlet",
-        "description": "TODO"
+        "description": "Semi-interactive command that creates a skinnable and skinlet template"
       }
     ],
     "languages": [
@@ -75,7 +75,18 @@
           ".h"
         ]
       }
-      ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "QSkinny Extension",
+      "properties": {
+        "qskinny.advancedCommands": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable advanced commands"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
