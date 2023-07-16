@@ -1,36 +1,37 @@
-# qskinny README
+# QSkinny VS Code Extension
 
-This is the README for your extension "qskinny". After writing up a brief description, we recommend including the following sections.
+> The (Q)Skinny library is a framework built on top of the Qt scene graph and very few core classes from Qt/Quick. It offers a set of lightweight controls, that can be used from C++ and/or QML.
+> 
+> -- <cite>[QSkinny Repository](https://github.com/uwerat/qskinny)</cite>
+
+This extension provides usefull commands to accelerate QSkinny / C++ code generation.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- Transforming `QSK_SUBCONTROLS` or `QSK_STATES` declarations into initializations
 
-For example if there is an image subfolder under your extension project workspace:
+|QSK_SUBCONTROLS|QSK_STATES|
+|-|-|
+|![](./doc/qskinny.subcontrols.subcontrol.gif)|![](./doc/qskinny.states.state.gif)|
 
-\!\[feature X\]\(images/feature-x.png\)
+- Transforming `QSK_SUBCONTROLS` declarations into sequences of if/switch statements
+- Simple static code analysis for e.g. missing `Q_INVOKABLE` macro in skinlet declarations
 
-![](./doc/r1.gif)
-![](./doc/r2.gif)
-![](./doc/r3.gif)
-![](./doc/r4.gif)
-![](./doc/r5.gif)
-![](./doc/r6.gif)
-![](./doc/r7.gif)
-![](./doc/r8.gif)
-![](./doc/r9.gif)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+![](./doc/qskinny.missing.qinvokable.quickfix.gif)
 
 ## Commands
 
 ### QSK: QSK_SUBCONTROLS(...) - Input
+
+An example input / text selection assumed as input for the following commands' output
 
 ```cpp
 QSK_SUBCONTROLS( Overlay, Panel, Segment, Cursor, Text, Icon, Separator )
 ```
 
 ### QSK: QSK_SUBCONTROLS(...) => QSK_SUBCONTROL(..., ...) - Output
+
+Transforms a QSK_SUBCONTROLS(...) declaration into a sequence of QSK_SUBCONTROL(..., ...) initializations (one per subcontrol)
 
 ```cpp
 QSK_SUBCONTROL( QskMenu, Overlay )
@@ -42,7 +43,11 @@ QSK_SUBCONTROL( QskMenu, Icon )
 QSK_SUBCONTROL( QskMenu, Separator )
 ```
 
+![](./doc/qskinny.subcontrols.subcontrol.gif)
+
 ### QSK: QSK_SUBCONTROLS(...) => if( subControl == ...) - Output
+
+Transforms a QSK_SUBCONTROLS(...) declaration into a sequence of empty (else)if statements (one per subcontrol)
 
 ```cpp
 if ( subControl == QskMenu::Overlay ){}
@@ -54,7 +59,11 @@ else if ( subControl == QskMenu::Icon ){}
 else if ( subControl == QskMenu::Separator ){}
 ```
 
+![](./doc/qskinny.subcontrols.subcontrol.if.gif)
+
 ### QSK: QSK_SUBCONTROLS(...) => enum NodeRole { ... }
+
+Transforms a QSK_SUBCONTROLS(...) declaration into a node roles enum declaration (one enumerator per subcontrol)
 
 ```cpp
 enum NodeRole
@@ -69,6 +78,8 @@ enum NodeRole
 };
 ```
 
+![](./doc/qskinny.subcontrols.noderoles.gif)
+
 ### QSK: QSK_STATES(...) - Input
 
 ```cpp
@@ -77,17 +88,25 @@ QSK_STATES( Checked, Pressed )
 
 ### QSK: QSK_STATES(...) => QSK_STATE(..., ..., ...) - Output
 
+Transforms a QSK_STATES(...) declaration into a sequence of QSK_STATE(..., ..., QskAspect::FirstUserState << ...) initializations (one per subcontrol)
+
 ```cpp
 QSK_STATE( QskAbstractButton, Checked, QskAspect::FirstUserState << 0 )
 QSK_STATE( QskAbstractButton, Pressed, QskAspect::FirstUserState << 1 )
 ```
 
+![](./doc/qskinny.states.state.gif)
+
 ### QSK: QSK_STATES(...) => QSK_SYSTEM_STATE(..., ..., ...) - Output
+
+Transforms a QSK_STATES(...) declaration into a sequence of QSK_STATE(..., ..., QskAspect::FirstSystemState << ...) initializations (one per subcontrol)
 
 ```cpp
 QSK_SYSTEM_STATE( QskAbstractButton, Checked, QskAspect::FirstSystemState << 0 )
 QSK_SYSTEM_STATE( QskAbstractButton, Pressed, QskAspect::FirstSystemState << 0 )
 ```
+
+![](./doc/qskinny.states.systemstate.gif)
 
 ### QSK: enum NodeRole - Input
 
@@ -102,7 +121,33 @@ enum NodeRole
 };
 ```
 
+### QSK: enum NodeRole => switch(...) - Output
+
+Transforms an enumeration declaration into a switch statement (one case per subcontrol)
+
+```cpp
+switch(static_cast<Q::NodeRole>(role))
+{
+	case Q::NodeRole::PanelRole:
+		break;
+	case Q::NodeRole::SplashRole:
+		break;
+	case Q::NodeRole::TextRole:
+		break;
+	case Q::NodeRole::IconRole:
+		break;
+	case Q::NodeRole::RoleCount:
+		break;
+	default:
+		break;
+}
+```
+
+![](./doc/qskinny.noderoles.switch.gif)
+
 ### QSK: enum NodeRole => template<NodeRole> - Output
+
+> This is considered an `advanced command`
 
 ```cpp
 // TODO move to .h file
@@ -132,6 +177,8 @@ QSGNode* QskPushButtonSkinlet::updateSubNode<QskPushButtonSkinlet::NodeRole::Rol
 
 ### QSK: enum NodeRole => switch(...) template<NodeRole> - Output
 
+> This is considered an `advanced command`
+
 ```cpp
 QSGNode* QskPushButtonSkinlet::updateSubNode( const QskSkinnable* const skinnable, const quint8 role, QSGNode* const node ) const override;
 {
@@ -148,60 +195,30 @@ QSGNode* QskPushButtonSkinlet::updateSubNode( const QskSkinnable* const skinnabl
 }
 ```
 
+### QSK: Skinnable + Skinlet
+
+Semi-interactive command that creates a skinnable and skinlet template
+
+![](./doc/qskinny.noderoles.template.tutorial.gif)
+
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+Currently none
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+* `qskinny.advancedCommands`: Enable/disable advanced commands.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Currently none
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+Currently none
 
-### 1.0.0
+### 0.0.1
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Initial release
