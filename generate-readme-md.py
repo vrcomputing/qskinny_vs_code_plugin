@@ -23,7 +23,7 @@ txtroot= f"{os.getcwd()}/qskinny/doc".replace("\\", "/")
 with open(f"{os.getcwd()}/qskinny/package.json", "r") as input:
     content = json.load(input)
     with open(f"{os.getcwd()}/qskinny/ReadMe.md", "w") as md:
-        md.write(f"# {content['displayName']} VS Code Extension - Version {content['version']}\n")
+        md.write(f"# {content['displayName']} VS Code Extension\n")
         md.write(f"\n")
         md.write("> The (Q)Skinny library is a framework built on top of the Qt scene graph and very few core classes from Qt/Quick. It offers a set of lightweight controls, that can be used from C++ and/or QML.\n")
         md.write(">\n")
