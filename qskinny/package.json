@@ -27,32 +27,32 @@
       {
         "command": "qskinny.subcontrols.subcontrol",
         "title": "QSK: QSK_SUBCONTROLS(...) => QSK_SUBCONTROL(..., ...)",
-        "description": "Transforms a QSK_SUBCONTROLS(...) declaration into a sequence of QSK_SUBCONTROL(..., ...) initializations (one per subcontrol)"
+        "description": "Transforms a QSK_SUBCONTROLS(...) selection into a sequence of QSK_SUBCONTROL(..., ...) initializations (one per subcontrol)"
       },
       {
         "command": "qskinny.subcontrols.subcontrol.if",
         "title": "QSK: QSK_SUBCONTROLS(...) => if( subControl == ...)",
-        "description": "Transforms a QSK_SUBCONTROLS(...) declaration into a sequence of empty (else)if statements (one per subcontrol)"
+        "description": "Transforms a QSK_SUBCONTROLS(...) selection into a sequence of empty (else)if statements (one per subcontrol)"
       },
       {
         "command": "qskinny.subcontrols.noderoles",
         "title": "QSK: QSK_SUBCONTROLS(...) => enum NodeRole { ... }",
-        "description": "Transforms a QSK_SUBCONTROLS(...) declaration into a node roles enum declaration (one enumerator per subcontrol)"
+        "description": "Transforms a QSK_SUBCONTROLS(...) selection into a node roles enum declaration (one enumerator per subcontrol)"
       },
       {
         "command": "qskinny.states.state",
         "title": "QSK: QSK_STATES(...) => QSK_STATE(..., ..., ...)",
-        "description": "Transforms a QSK_STATES(...) declaration into a sequence of QSK_STATE(..., ..., QskAspect::FirstUserState << ...) initializations (one per subcontrol)"
+        "description": "Transforms a QSK_STATES(...) selection into a sequence of QSK_STATE(..., ..., QskAspect::FirstUserState << ...) initializations (one per subcontrol)"
       },
       {
         "command": "qskinny.states.systemstate",
         "title": "QSK: QSK_STATES(...) => QSK_SYSTEM_STATE(..., ..., ...)",
-        "description": "Transforms a QSK_STATES(...) declaration into a sequence of QSK_STATE(..., ..., QskAspect::FirstSystemState << ...) initializations (one per subcontrol)"
+        "description": "Transforms a QSK_STATES(...) selection into a sequence of QSK_STATE(..., ..., QskAspect::FirstSystemState << ...) initializations (one per subcontrol)"
       },
       {
         "command": "qskinny.noderoles.switch",
         "title": "QSK: enum NodeRole => switch(...)",
-        "description": "Transforms an enumeration declaration into a switch statement (one case per subcontrol)"
+        "description": "Transforms an enumeration selection into a switch statement (one case per subcontrol)"
       },
       {
         "command": "qskinny.noderoles.template.subcontrol",

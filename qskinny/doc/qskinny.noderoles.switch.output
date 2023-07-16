@@ -1,0 +1,19 @@
+switch(static_cast<Q::NodeRole>(role))
+{
+	case Q::NodeRole::Overlay:
+		break;
+	case Q::NodeRole::Panel:
+		break;
+	case Q::NodeRole::Segment:
+		break;
+	case Q::NodeRole::Cursor:
+		break;
+	case Q::NodeRole::Text:
+		break;
+	case Q::NodeRole::Icon:
+		break;
+	case Q::NodeRole::Separator:
+		break;
+	default:
+		break;
+}

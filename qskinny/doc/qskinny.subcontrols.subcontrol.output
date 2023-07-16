@@ -1,0 +1,7 @@
+QSK_SUBCONTROL( Skinnable, Overlay )
+QSK_SUBCONTROL( Skinnable, Panel )
+QSK_SUBCONTROL( Skinnable, Segment )
+QSK_SUBCONTROL( Skinnable, Cursor )
+QSK_SUBCONTROL( Skinnable, Text )
+QSK_SUBCONTROL( Skinnable, Icon )
+QSK_SUBCONTROL( Skinnable, Separator )

@@ -1,0 +1,15 @@
+QSGNode* Q::updateSubNode( const QskSkinnable* const skinnable, const quint8 role, QSGNode* const node ) const override;
+{
+	using R = Q::NodeRole;
+	switch( static_cast< Q::NodeRole >( role ) )
+	{
+		case R::Overlay: return updateSubNode<R::Overlay>(skinnable, node);
+		case R::Panel: return updateSubNode<R::Panel>(skinnable, node);
+		case R::Segment: return updateSubNode<R::Segment>(skinnable, node);
+		case R::Cursor: return updateSubNode<R::Cursor>(skinnable, node);
+		case R::Text: return updateSubNode<R::Text>(skinnable, node);
+		case R::Icon: return updateSubNode<R::Icon>(skinnable, node);
+		case R::Separator: return updateSubNode<R::Separator>(skinnable, node);
+		default: return Inherited::updateSubNode(skinnable, role, node);
+	}
+}

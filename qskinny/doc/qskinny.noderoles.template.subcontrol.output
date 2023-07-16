@@ -1,0 +1,42 @@
+// TODO move to .h file
+template<Q::NodeRole>
+QSGNode* updateSubNode( const QskSkinnable* skinnable, QSGNode* node) const;
+
+// TODO move to .cpp file
+template<NodeRole>
+QSGNode* Q::updateSubNode( const QskSkinnable* skinnable, QSGNode* node) const = delete;
+
+template<>
+QSGNode* Q::updateSubNode<Q::NodeRole::Overlay>( const QskSkinnable* const skinnable, QSGNode* node) const
+{
+}
+
+template<>
+QSGNode* Q::updateSubNode<Q::NodeRole::Panel>( const QskSkinnable* const skinnable, QSGNode* node) const
+{
+}
+
+template<>
+QSGNode* Q::updateSubNode<Q::NodeRole::Segment>( const QskSkinnable* const skinnable, QSGNode* node) const
+{
+}
+
+template<>
+QSGNode* Q::updateSubNode<Q::NodeRole::Cursor>( const QskSkinnable* const skinnable, QSGNode* node) const
+{
+}
+
+template<>
+QSGNode* Q::updateSubNode<Q::NodeRole::Text>( const QskSkinnable* const skinnable, QSGNode* node) const
+{
+}
+
+template<>
+QSGNode* Q::updateSubNode<Q::NodeRole::Icon>( const QskSkinnable* const skinnable, QSGNode* node) const
+{
+}
+
+template<>
+QSGNode* Q::updateSubNode<Q::NodeRole::Separator>( const QskSkinnable* const skinnable, QSGNode* node) const
+{
+}

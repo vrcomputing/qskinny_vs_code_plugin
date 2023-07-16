@@ -1,0 +1,21 @@
+if ( subControl == Q::Overlay )
+{
+}
+else if ( subControl == Q::Panel )
+{
+}
+else if ( subControl == Q::Segment )
+{
+}
+else if ( subControl == Q::Cursor )
+{
+}
+else if ( subControl == Q::Text )
+{
+}
+else if ( subControl == Q::Icon )
+{
+}
+else if ( subControl == Q::Separator )
+{
+}

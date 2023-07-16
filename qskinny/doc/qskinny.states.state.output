@@ -1,0 +1,2 @@
+QSK_STATE( Skinnable, Checked, QskAspect::FirstUserState << 0 )
+QSK_STATE( Skinnable, Pressed, QskAspect::FirstUserState << 1 )
