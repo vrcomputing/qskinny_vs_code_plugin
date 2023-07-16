@@ -1,12 +1,20 @@
 {
   "name": "qskinny",
-  "displayName": "qskinny",
-  "description": "",
+  "publisher": "vrcomputing",
+  "displayName": "QSkinny",
+  "repository": {
+    "url": "https://github.com/vrcomputing/qskinny_vs_code_plugin.git",
+    "directory": "qskinny"
+  },
+  "license": "MIT",
+  "description": "This extension provides usefull commands to accelerate QSkinny / C++ code generation",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.80.0"
   },
   "categories": [
+    "Programming Languages",
+    "Snippets",
     "Other"
   ],
   "activationEvents": [
