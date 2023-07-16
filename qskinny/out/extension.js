@@ -36,7 +36,7 @@ function qskMacroParameters(name, line) {
     if (!match) {
         return null;
     }
-    const macro = new CppMacro(match[1].trim(), match[2].split(',').map(s => s.trim()));
+    const macro = new CppMacro(match[1].trim(), match[2].split(',').map(s => s.trim()).filter(s => s.match(/\w+/)));
     return macro;
 }
 /**
@@ -52,7 +52,7 @@ function qskFindClassnameBeforeLine(line, document, fallback = 'Q') {
     // find candidate for the class name
     for (let lineNumber = line - 1; lineNumber >= 0; lineNumber--) {
         const lineText = document.lineAt(lineNumber).text;
-        const match = lineText.match(/(?:class|struct).*\s+(\w+)\s*:/);
+        const match = lineText.match(/.*(?:class|struct).*\s+(\w+)\s*:.*/);
         if (match) {
             skinnable = match[1].trim();
             return skinnable;
@@ -74,8 +74,7 @@ function qskNodeRoleTransformation(transform) {
         const match = line.match(/enum\s+(\w+)\s*\{(.*)\}/);
         if (match) {
             const name = match[1];
-            const enumerators = match[2].split(',').map(s => s.trim().split('=')[0].trim());
-            console.log(enumerators);
+            const enumerators = match[2].split(',').map(s => s.trim().split('=')[0].trim()).filter(s => s.length > 0);
             const enumeration = new CppEnumeration(name, enumerators);
             let skinlet = qskFindClassnameBeforeLine(selection.start.line, editor.document, 'Q');
             const lines = transform(skinlet, enumeration);
@@ -189,10 +188,10 @@ function activate(context) {
     }
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor), vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument));
     // qsk subcontrol transformations
-    context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_subcontrols.qsk_subcontrol', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('qskinny.subcontrols.subcontrol', () => {
         qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_SUBCONTROL( ${skinnable}, ${subcontrol} )`));
     }));
-    context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_subcontrols.qsk_subcontrols_if', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('qskinny.subcontrols.subcontrol.if', () => {
         let index = 0;
         qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, macro) => macro.parameters.map(subcontrol => (index++ > 0 ? 'else ' : '') + `if ( subControl == ${skinnable}::${subcontrol} )\n{\n}`));
     }));
@@ -204,13 +203,13 @@ function activate(context) {
         });
     }));
     // qsk states transformations
-    context.subscriptions.push(vscode.commands.registerCommand('qskinny.qsk_states.qsk_state', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('qskinny.states.state', () => {
         let index = 0;
         qskMacroTransformation('QSK_STATES', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstUserState << ${index++} )`));
     }));
     context.subscriptions.push(vscode.commands.registerCommand('qskinny.states.systemstate', () => {
         let index = 0;
-        qskMacroTransformation('QSK_STATES', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_SYSTEM_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstSystemState << ${index} )`));
+        qskMacroTransformation('QSK_STATES', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_SYSTEM_STATE( ${skinnable}, ${subcontrol}, QskAspect::FirstSystemState << ${index++} )`));
     }));
     // enum transformations 
     context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.switch', () => {
