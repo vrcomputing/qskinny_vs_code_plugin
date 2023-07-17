@@ -74,13 +74,15 @@
       {
         "id": "cpp",
         "extensions": [
-          ".h"
+          ".h",
+          ".cpp"
         ]
       },
       {
         "id": "c",
         "extensions": [
-          ".h"
+          ".h",
+          ".cpp"
         ]
       }
     ],

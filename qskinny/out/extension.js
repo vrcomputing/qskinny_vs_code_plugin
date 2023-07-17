@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
 const vscode = require("vscode");
+const diagnostics_1 = require("./diagnostics");
+const qsk = require("./diagnosticsQsk");
 class CppMacro {
     constructor(name, parameters) {
         this.name = name;
@@ -12,17 +14,6 @@ class CppEnumeration {
     constructor(name, enumerators) {
         this.name = name;
         this.enumerators = enumerators;
-    }
-}
-class MyCodeActionProvider {
-    provideCodeActions(document, range) {
-        const diagnostic = new vscode.Diagnostic(range, 'This is a warning message', vscode.DiagnosticSeverity.Warning);
-        const fixAction = new vscode.CodeAction('Fix warning', vscode.CodeActionKind.QuickFix);
-        fixAction.diagnostics = [diagnostic];
-        fixAction.isPreferred = true;
-        fixAction.edit = new vscode.WorkspaceEdit();
-        fixAction.edit.insert(document.uri, range.start, 'Q_INVOKABLE ');
-        return [fixAction];
     }
 }
 /**
@@ -119,74 +110,19 @@ function qskMacroTransformation(macroname, transform) {
 }
 function activate(context) {
     console.log('Congratulations, your extension "qskinny" is now active!');
-    const diagnosticCollection = vscode.languages.createDiagnosticCollection('Opened Header Problems');
-    let activeEditor = vscode.window.activeTextEditor;
-    const codeActionProvider = new MyCodeActionProvider();
-    context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ scheme: 'file' }, codeActionProvider));
-    function updateDiagnostics(document) {
-        const diagnostics = [];
-        let certainty = 0.0;
-        if (document.fileName.match(/.*Skinlet.*/)) {
-            certainty += 0.1;
-        }
-        let classname = '';
-        for (let lineIndex = 0; lineIndex < document.lineCount; ++lineIndex) {
-            const line = document.lineAt(lineIndex);
-            if (line.text.match(/:.*QskSkinlet.*/)) {
-                certainty += 0.33;
-            }
-            if (line.text.match(/.*Q_GADGET.*/)) {
-                certainty += 0.33;
-                classname = qskFindClassnameBeforeLine(line.lineNumber, document, 'Q');
-                if (classname.match(/.*Skinlet.*/)) {
-                    certainty += 0.2;
-                }
-            }
-        }
-        if (certainty > 0.66) {
-            for (let lineIndex = 0; lineIndex < document.lineCount; ++lineIndex) {
-                const line = document.lineAt(lineIndex);
-                if (line.text.match(/\w+\s*\(\s*QskSkin\s*\*.*\)/) && !line.text.match(/.*Q_INVOKABLE.*/)) {
-                    // Create the diagnostic for the opened file
-                    const range = new vscode.Range(new vscode.Position(line.lineNumber, line.text.indexOf(classname)), new vscode.Position(line.lineNumber, line.text.length));
-                    const diagnostic = new vscode.Diagnostic(range, `(${certainty * 100}%) Missing Q_INVOKABLE?`, vscode.DiagnosticSeverity.Warning);
-                    diagnostics.push(diagnostic);
-                }
-            }
-            // Update the diagnostics for the opened file
-            diagnosticCollection.set(document.uri, diagnostics);
-        }
-    }
-    function onDidChangeTextDocument(event) {
-        const document = event.document;
-        if (document.languageId === 'cpp' || document.languageId === 'c') {
-            const fileExt = document.fileName.split('.').pop();
-            if (fileExt === 'h') {
-                updateDiagnostics(document);
-            }
-        }
-    }
-    function onDidChangeActiveTextEditor(editor) {
-        if (editor) {
-            const document = editor.document;
-            if (document.languageId === 'cpp' || document.languageId === 'c') {
-                const fileExt = document.fileName.split('.').pop();
-                if (fileExt === 'h') {
-                    updateDiagnostics(document);
-                }
-            }
-        }
-    }
-    if (activeEditor) {
-        const document = activeEditor.document;
-        if (document.languageId === 'cpp' || document.languageId === 'c') {
-            const fileExt = document.fileName.split('.').pop();
-            if (fileExt === 'h') {
-                updateDiagnostics(document);
-            }
-        }
-    }
-    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(onDidChangeActiveTextEditor), vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument));
+    // diagnostics
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider('cpp', new qsk.MissingQGadgetActionProvider, {
+        providedCodeActionKinds: qsk.MissingQGadgetActionProvider.providedCodeActionKinds
+    }));
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider('cpp', new qsk.MissingQInvokableActionProvider, {
+        providedCodeActionKinds: qsk.MissingQInvokableActionProvider.providedCodeActionKinds
+    }));
+    const missingQGadgetCollection = vscode.languages.createDiagnosticCollection('Missing Q_GADGET');
+    context.subscriptions.push(missingQGadgetCollection);
+    const missingQInvokableCollection = vscode.languages.createDiagnosticCollection('Missing Q_INVOKABLE');
+    context.subscriptions.push(missingQInvokableCollection);
+    (0, diagnostics_1.subscribeToDocumentChanges)(context, missingQGadgetCollection, qsk.refreshMissingQGadget);
+    (0, diagnostics_1.subscribeToDocumentChanges)(context, missingQInvokableCollection, qsk.refreshMissingQInvokable);
     // qsk subcontrol transformations
     context.subscriptions.push(vscode.commands.registerCommand('qskinny.subcontrols.subcontrol', () => {
         qskMacroTransformation('QSK_SUBCONTROLS', (skinnable, macro) => macro.parameters.map(subcontrol => `QSK_SUBCONTROL( ${skinnable}, ${subcontrol} )`));
