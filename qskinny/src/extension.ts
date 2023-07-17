@@ -122,15 +122,8 @@ function activate(context: vscode.ExtensionContext): void {
 
   // diagnostics
 
-  context.subscriptions.push(
-    vscode.languages.registerCodeActionsProvider('cpp', new qsk.MissingQGadgetActionProvider, {
-      providedCodeActionKinds: qsk.MissingQGadgetActionProvider.providedCodeActionKinds
-    }));
-
-  context.subscriptions.push(
-    vscode.languages.registerCodeActionsProvider('cpp', new qsk.MissingQInvokableActionProvider, {
-      providedCodeActionKinds: qsk.MissingQInvokableActionProvider.providedCodeActionKinds
-    }));
+  context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ scheme: 'file' }, new qsk.MissingQGadgetActionProvider));
+  context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ scheme: 'file' }, new qsk.MissingQInvokableActionProvider));
 
   const missingQGadgetCollection = vscode.languages.createDiagnosticCollection('Missing Q_GADGET');
   context.subscriptions.push(missingQGadgetCollection);

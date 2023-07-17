@@ -69,7 +69,10 @@ export function refreshMissingQInvokable(doc: vscode.TextDocument, allDiagnostic
         const s: string = (index + 0 < tokens.length) ? doc.getText(tokens[index + 0]) : '';
         const c: string = (index + 1 < tokens.length) ? doc.getText(tokens[index + 1]) : '';
         if (s.indexOf('QskSkinlet') >= 0 && c.indexOf('QskSkin') >= 0 && c.indexOf('Q_INVOKABLE') === -1) {
-            diagnostics.push(createDiagnosticRange(doc, tokens[index + 1], 'Q_INVOKABLE'));
+            const lineIndex = tokens[index + 1].start.line;
+            const from = new vscode.Position(lineIndex, 0);
+            const to = new vscode.Position(lineIndex, doc.lineAt(lineIndex).firstNonWhitespaceCharacterIndex);
+            diagnostics.push(createDiagnosticRange(doc, new vscode.Range(from, to), 'Q_INVOKABLE'));
         }
     });
 
@@ -84,16 +87,16 @@ export class MissingQInvokableActionProvider implements vscode.CodeActionProvide
     ];
 
     provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
-        const missingQGadgetDiagnostics: vscode.Diagnostic[] = context.diagnostics.filter(
+        const diagnostics: vscode.Diagnostic[] = context.diagnostics.filter(
             diagnostic => diagnostic.code === 'Q_INVOKABLE'
         );
 
-        const codeActions: vscode.CodeAction[] = missingQGadgetDiagnostics.map(diagnostic => {
+        const codeActions: vscode.CodeAction[] = diagnostics.map(diagnostic => {
             const fixAction = new vscode.CodeAction('Insert missing Q_INVOKABLE', vscode.CodeActionKind.QuickFix);
             fixAction.diagnostics = [diagnostic];
             fixAction.isPreferred = true;
             fixAction.edit = new vscode.WorkspaceEdit();
-            fixAction.edit.insert(document.uri, range.start, 'Q_INVOKABLE ');
+            fixAction.edit.insert(document.uri, range.end, 'Q_INVOKABLE ');
             return fixAction;
         });
 
@@ -108,12 +111,20 @@ export class MissingQGadgetActionProvider implements vscode.CodeActionProvider {
     ];
 
     provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
-        const diagnostic = new vscode.Diagnostic(range, 'This is a warning message', vscode.DiagnosticSeverity.Warning);
-        const fixAction = new vscode.CodeAction('Insert missing Q_GADGET', vscode.CodeActionKind.QuickFix);
-        fixAction.diagnostics = [diagnostic];
-        fixAction.isPreferred = true;
-        fixAction.edit = new vscode.WorkspaceEdit();
-        fixAction.edit.insert(document.uri, range.end, 'Q_GADGET');
-        return [fixAction];
+
+        const diagnostics: vscode.Diagnostic[] = context.diagnostics.filter(
+            diagnostic => diagnostic.code === 'Q_GADGET'
+        );
+
+        const codeActions: vscode.CodeAction[] = diagnostics.map(diagnostic => {
+            const fixAction = new vscode.CodeAction('Insert missing Q_GADGET', vscode.CodeActionKind.QuickFix);
+            fixAction.diagnostics = [diagnostic];
+            fixAction.isPreferred = true;
+            fixAction.edit = new vscode.WorkspaceEdit();
+            fixAction.edit.insert(document.uri, range.end.translate(0, 1), 'Q_GADGET');
+            return fixAction;
+        });
+
+        return codeActions;
     }
 }

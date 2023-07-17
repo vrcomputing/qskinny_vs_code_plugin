@@ -111,12 +111,8 @@ function qskMacroTransformation(macroname, transform) {
 function activate(context) {
     console.log('Congratulations, your extension "qskinny" is now active!');
     // diagnostics
-    context.subscriptions.push(vscode.languages.registerCodeActionsProvider('cpp', new qsk.MissingQGadgetActionProvider, {
-        providedCodeActionKinds: qsk.MissingQGadgetActionProvider.providedCodeActionKinds
-    }));
-    context.subscriptions.push(vscode.languages.registerCodeActionsProvider('cpp', new qsk.MissingQInvokableActionProvider, {
-        providedCodeActionKinds: qsk.MissingQInvokableActionProvider.providedCodeActionKinds
-    }));
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ scheme: 'file' }, new qsk.MissingQGadgetActionProvider));
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider({ scheme: 'file' }, new qsk.MissingQInvokableActionProvider));
     const missingQGadgetCollection = vscode.languages.createDiagnosticCollection('Missing Q_GADGET');
     context.subscriptions.push(missingQGadgetCollection);
     const missingQInvokableCollection = vscode.languages.createDiagnosticCollection('Missing Q_INVOKABLE');
