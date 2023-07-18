@@ -96,7 +96,13 @@
           "description": "Enable advanced commands"
         }
       }
-    }
+    },
+    "snippets": [
+      {
+				"language": "cpp",
+				"path": "./snippets/template.json"
+			}
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

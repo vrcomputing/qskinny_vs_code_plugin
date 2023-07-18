@@ -1,0 +1,117 @@
+{
+    "Insert 'QskSkinnable' declaration": {
+        "prefix": [
+            "QSK Skinnable Declaration"
+        ],
+        "body": [
+            "#pragma once",
+            "",
+            "#include <QskControl.h>",
+            "",
+            "class ${1:ExampleControl} : public QskControl",
+            "{",
+            "public:",
+            "\tQSK_SUBCONTROLS(Foreground, Text)",
+            "\texplicit ${1:ExampleControl}( QQuickItem* parent = nullptr );",
+            "};"
+        ],
+        "description": "TODO"
+    },
+    "Insert 'QskSkinnable' implementation": {
+        "prefix": [
+            "QSK Skinnable Implementation"
+        ],
+        "body": [
+            "#include \"${1:ExampleControl}.h\"",
+            "",
+            "QSK_SUBCONTROL(${1:ExampleControl}, Foreground)",
+            "QSK_SUBCONTROL(${1:ExampleControl}, Text)",
+            "",
+            "${1:ExampleControl}::${1:ExampleControl}( QQuickItem* const parent ) : QskControl( parent )",
+            "{",
+            "\t// TODO move into your skin",
+            "\tsetColor(Background, Qt::lightGray);",
+            "\tsetColor(Foreground, Qt::black);",
+            "\tsetColor(Text, Qt::white);",
+            "}",
+            "",
+            "#include \"moc_${1:ExampleControl}.cpp\""
+        ],
+        "description": "TODO"
+    },
+    "Insert 'QskSkinlet' declaration": {
+        "prefix": [
+            "QSK Skinlet Declaration"
+        ],
+        "body": [
+            "#pragma once",
+            "",
+            "#include <QskSkinlet.h>",
+            "",
+            "class ${1:ExampleControl}Skinlet : public QskSkinlet",
+            "{",
+            "\tQ_GADGET",
+            "public:",
+            "\tenum NodeRole",
+            "\t{",
+            "\t\tText,",
+            "\t\tForeground,",
+            "\t\tRoleCount",
+            "\t};",
+            "",
+            "\tQ_INVOKABLE ${1:ExampleControl}Skinlet( QskSkin* skin = nullptr );",
+            "",
+            "protected:",
+            "\tQ_REQUIRED_RESULT QRectF subControlRect( const QskSkinnable* skinnable, const QRectF& contentsRect, QskAspect::Subcontrol subControl) const override;",
+            "\tQ_REQUIRED_RESULT QSGNode* updateSubNode( const QskSkinnable* skinnable, quint8 nodeRole, QSGNode* node) const override;",
+            "};"
+        ],
+        "description": "TODO"
+    },
+    "Insert 'QskSkinlet' implementation": {
+        "prefix": [
+            "QSK Skinlet Implementation"
+        ],
+        "body": [
+            "#include \"${1:ExampleControl}Skinlet.h\"",
+            "#include \"${1:ExampleControl}.h\"",
+            "",
+            "${1:ExampleControl}Skinlet::${1:ExampleControl}Skinlet( QskSkin* const skin )",
+            "\t: QskSkinlet( skin )",
+            "{",
+            "\tsetNodeRoles( { Foreground, Text } );",
+            "}",
+            "",
+            "QRectF ${1:ExampleControl}Skinlet::subControlRect( const QskSkinnable* const skinnable,",
+            "\tconst QRectF& contentsRect, const QskAspect::Subcontrol subControl ) const",
+            "{",
+            "\tif ( subControl == ${1:ExampleControl}::Text )",
+            "\t{",
+            "\t\treturn contentsRect.adjusted( +20, +20, -20, -20 );",
+            "\t}",
+            "\telse if ( subControl == ${1:ExampleControl}::Foreground )",
+            "\t{",
+            "\t\treturn contentsRect.adjusted( +10, +10, -10, -10 );",
+            "\t}",
+            "\treturn QskSkinlet::subControlRect( skinnable, contentsRect, subControl );",
+            "}",
+            "",
+            "QSGNode* ${1:ExampleControl}Skinlet::updateSubNode(",
+            "\tconst QskSkinnable* const skinnable, const quint8 nodeRole, QSGNode* const node ) const",
+            "{",
+            "\tswitch ( static_cast< NodeRole >( nodeRole ) )",
+            "\t{",
+            "\t\tcase Text:",
+            "\t\t\treturn updateTextNode( skinnable, node, \"${1:ExampleControl}\", ${1:ExampleControl}::Text );",
+            "\t\tcase Foreground:",
+            "\t\t\treturn updateBoxNode( skinnable, node, ${1:ExampleControl}::Foreground );",
+            "\t\tdefault:",
+            "\t\t\treturn QskSkinlet::updateSubNode( skinnable, nodeRole, node );",
+            "\t}",
+            "}",
+            "",
+            "#include \"moc_${1:ExampleControl}Skinlet.cpp\""
+        ],
+        "description": "TODO"
+    }
+}

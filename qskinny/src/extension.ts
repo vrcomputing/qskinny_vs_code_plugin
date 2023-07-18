@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+
 import { subscribeToDocumentChanges } from './diagnostics';
 import * as qsk from './diagnosticsQsk';
 
@@ -115,6 +117,31 @@ function qskMacroTransformation(macroname: string, transform: (skinnable: string
   }
 }
 
+function loadSnippetContent(snippetFileName: string): string {
+  const snippetUri = vscode.Uri.joinPath(
+    vscode.extensions.getExtension('vrcomputing.qskinny')!.extensionUri,
+    'snippets',
+    snippetFileName
+  );
+
+  try {
+    const snippetContent = fs.readFileSync(snippetUri.fsPath, 'utf-8');
+    return snippetContent;
+  } catch (error) {
+    console.error(`Error loading snippet '${snippetFileName}':`, error);
+    return '';
+  }
+}
+
+function loadSnippetBody(snippetName: string, snippetBody: string): string[] {
+  try {
+    const parsedJson = JSON.parse(snippetBody);
+    return parsedJson[snippetName].body.map((line: string) => line);
+  } catch (error) {
+    console.error('Error parsing JSON:', error);
+    return [];
+  }
+}
 
 function activate(context: vscode.ExtensionContext): void {
 
@@ -218,11 +245,7 @@ function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(vscode.commands.registerCommand('qskinny.noderoles.template.tutorial', () => {
     const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders || workspaceFolders?.length <= 0) {
-      vscode.window.showErrorMessage('No active workspace found');
-      return;
-    }
-    const workspaceFolder = workspaceFolders[0].uri;
+    let workspaceFolder: vscode.Uri | undefined = (workspaceFolders && workspaceFolders.length > 0) ? workspaceFolders[0].uri : undefined;
 
     const titles = [
       "Step 1/4: Create skinnable's header file",
@@ -231,98 +254,74 @@ function activate(context: vscode.ExtensionContext): void {
       "Step 4/4: Create skinlets's source file"
     ];
 
-    vscode.window.showInputBox({ title: titles[0], prompt: 'Enter skinnable name', placeHolder: 'e.g. ExampleControl', value: 'ExampleControl', validateInput: text => (text.match(/\w+/) ? "" : 'Must not be empty (a-zA-Z_)!') }).then(skinnable => {
-      const skinnableHpp = vscode.Uri.file(`${workspaceFolder.fsPath}/${skinnable}.h`);
-      const skinnableCpp = vscode.Uri.file(`${workspaceFolder.fsPath}/${skinnable}.cpp`);
-      const skinletHpp = vscode.Uri.file(`${workspaceFolder.fsPath}/${skinnable}Skinlet.h`);
-      const skinletCpp = vscode.Uri.file(`${workspaceFolder.fsPath}/${skinnable}Skinlet.cpp`);
-      vscode.workspace.openTextDocument(skinnableHpp.with({ scheme: 'untitled' })).then(doc => {
-        vscode.window.showTextDocument(doc).then(editor => {
-          const lines = [
-            '#pragma once',
-            '',
-            '#include <QskControl.h>',
-            '',
-            'class ${1:' + skinnable + '} : public QskControl',
-            '{',
-            '\texplicit ${1:' + skinnable + '}( QQuickItem* parent = nullptr );',
-            '};',
-          ];
-          const snippet = new vscode.SnippetString(lines.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
-          editor.insertSnippet(snippet, new vscode.Position(0, 0));
-          vscode.workspace.onDidSaveTextDocument((savedDocument) => {
-            if (savedDocument.uri.toString() === skinnableHpp.toString()) {
-              vscode.window.showInformationMessage(`Completed ${titles[0]}`);
-              vscode.workspace.openTextDocument(skinnableCpp.with({ scheme: 'untitled' })).then(doc => {
-                vscode.window.showTextDocument(doc).then(editor => {
-                  const lines = [
-                    '#include "${1:' + skinnable + '}.h"',
-                    '',
-                    '${1:' + skinnable + '}::${1:' + skinnable + '}( QQuickItem* const parent) : QskControl( parent )',
-                    '{',
-                    '}',
-                    '',
-                    '#include "moc_${1:' + skinnable + '}.cpp"',
-                  ];
-                  const snippet = new vscode.SnippetString(lines.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
-                  editor.insertSnippet(snippet, new vscode.Position(0, 0));
-                  vscode.workspace.onDidSaveTextDocument((savedDocument) => {
-                    if (savedDocument.uri.toString() === skinnableCpp.toString()) {
-                      vscode.window.showInformationMessage(`Completed ${titles[1]}`);
-                      vscode.workspace.openTextDocument(skinletHpp.with({ scheme: 'untitled' })).then(doc => {
-                        vscode.window.showTextDocument(doc).then(editor => {
-                          const lines = [
-                            '#pragma once',
-                            'class ${1:' + skinnable + '}Skinlet : public QskSkinlet',
-                            '{',
-                            '\tQ_GADGET',
-                            'public:',
-                            '\tenum NodeRole',
-                            '\t{',
-                            '\t\tRoleCount',
-                            '\t};',
-                            '',
-                            '\tQ_INVOKABLE ${1:' + skinnable + '}Skinlet( QskSkin* skin = nullptr );',
-                            '};',
-                          ];
-                          const snippet = new vscode.SnippetString(lines.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
-                          editor.insertSnippet(snippet, new vscode.Position(0, 0));
+    const options: vscode.OpenDialogOptions = {
+      canSelectFolders: true,
+      canSelectFiles: false,
+      canSelectMany: false,
+      openLabel: 'Open Folder',
+      defaultUri: workspaceFolder
+    };
 
-                          vscode.workspace.onDidSaveTextDocument((savedDocument) => {
-                            if (savedDocument.uri.toString() === skinletHpp.toString()) {
-                              vscode.window.showInformationMessage(`Completed ${titles[2]}`);
-                              vscode.workspace.openTextDocument(skinletCpp.with({ scheme: 'untitled' })).then(doc => {
-                                vscode.window.showTextDocument(doc).then(editor => {
-                                  const lines = [
-                                    '#include "${1:' + skinnable + '}Skinlet.h"',
-                                    ``,
-                                    '${1:' + skinnable + '}Skinlet( QskSkin* const skin = nullptr ) : QskSkinlet( skin )',
-                                    `{`,
-                                    `}`
-                                  ];
-                                  const snippet = new vscode.SnippetString(lines.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
-                                  editor.insertSnippet(snippet, new vscode.Position(0, 0));
-                                  vscode.workspace.onDidSaveTextDocument((savedDocument) => {
-                                    if (savedDocument.uri.toString() === skinletCpp.toString()) {
-                                      vscode.window.showInformationMessage(`Completed ${titles[3]}`);
-                                    }
+    vscode.window.showOpenDialog(options).then(folderUri => {
+      if (folderUri && folderUri[0]) {
+        const selectedFolder = folderUri[0];
+        vscode.window.showInputBox({ title: titles[0], prompt: 'Enter skinnable name', placeHolder: 'e.g. ExampleControl', value: 'ExampleControl', validateInput: text => (text.match(/\w+/) ? "" : 'Must not be empty (a-zA-Z_)!') }).then(skinnable => {
+          const snippetContent = loadSnippetContent('template.json');
+          const skinnableHpp = vscode.Uri.file(`${selectedFolder.fsPath}/${skinnable}.h`);
+          const skinnableHppContent = loadSnippetBody("Insert 'QskSkinnable' declaration", snippetContent);
+          const skinnableCpp = vscode.Uri.file(`${selectedFolder.fsPath}/${skinnable}.cpp`);
+          const skinnableCppContent = loadSnippetBody("Insert 'QskSkinnable' implementation", snippetContent);
+          const skinletHpp = vscode.Uri.file(`${selectedFolder.fsPath}/${skinnable}Skinlet.h`);
+          const skinletHppContent = loadSnippetBody("Insert 'QskSkinlet' declaration", snippetContent);
+          const skinletCpp = vscode.Uri.file(`${selectedFolder.fsPath}/${skinnable}Skinlet.cpp`);
+          const skinletCppContent = loadSnippetBody("Insert 'QskSkinlet' implementation", snippetContent);
+
+          vscode.workspace.openTextDocument(skinnableHpp.with({ scheme: 'untitled' })).then(doc => {
+            vscode.window.showTextDocument(doc).then(editor => {
+              const snippet = new vscode.SnippetString(skinnableHppContent.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
+              editor.insertSnippet(snippet, new vscode.Position(0, 0));
+              vscode.workspace.onDidSaveTextDocument((savedDocument) => {
+                if (savedDocument.uri.toString() === skinnableHpp.toString()) {
+                  vscode.window.showInformationMessage(`Completed ${titles[0]}`);
+                  vscode.workspace.openTextDocument(skinnableCpp.with({ scheme: 'untitled' })).then(doc => {
+                    vscode.window.showTextDocument(doc).then(editor => {
+                      const snippet = new vscode.SnippetString(skinnableCppContent.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
+                      editor.insertSnippet(snippet, new vscode.Position(0, 0));
+                      vscode.workspace.onDidSaveTextDocument((savedDocument) => {
+                        if (savedDocument.uri.toString() === skinnableCpp.toString()) {
+                          vscode.window.showInformationMessage(`Completed ${titles[1]}`);
+                          vscode.workspace.openTextDocument(skinletHpp.with({ scheme: 'untitled' })).then(doc => {
+                            vscode.window.showTextDocument(doc).then(editor => {
+                              const snippet = new vscode.SnippetString(skinletHppContent.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
+                              editor.insertSnippet(snippet, new vscode.Position(0, 0));
+                              vscode.workspace.onDidSaveTextDocument((savedDocument) => {
+                                if (savedDocument.uri.toString() === skinletHpp.toString()) {
+                                  vscode.window.showInformationMessage(`Completed ${titles[2]}`);
+                                  vscode.workspace.openTextDocument(skinletCpp.with({ scheme: 'untitled' })).then(doc => {
+                                    vscode.window.showTextDocument(doc).then(editor => {
+                                      const snippet = new vscode.SnippetString(skinletCppContent.join(doc.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'));
+                                      editor.insertSnippet(snippet, new vscode.Position(0, 0));
+                                      vscode.workspace.onDidSaveTextDocument((savedDocument) => {
+                                        if (savedDocument.uri.toString() === skinletCpp.toString()) {
+                                          vscode.window.showInformationMessage(`Completed ${titles[3]}`);
+                                        }
+                                      });
+                                    });
                                   });
-                                });
+                                }
                               });
-                            }
+                            });
                           });
-                        });
+                        }
                       });
-                    }
+                    });
                   });
-                });
+                }
               });
-            }
+            });
           });
         });
-      },
-        err => vscode.window.showErrorMessage(`Failed to open "${skinnableHpp.fsPath}": ${err}`)
-      );
+      }
     });
   }));
 }
