@@ -99,6 +99,10 @@
     },
     "snippets": [
       {
+				"language": "c",
+				"path": "./snippets/template.json"
+			},
+      {
 				"language": "cpp",
 				"path": "./snippets/template.json"
 			}
