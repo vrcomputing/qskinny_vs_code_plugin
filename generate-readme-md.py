@@ -31,7 +31,17 @@ with open(f"{os.getcwd()}/qskinny/package.json", "r") as input:
         md.write("> -- <cite>[QSkinny Repository](https://github.com/uwerat/qskinny)</cite>\n")
         md.write(f"\n")
         md.write(f"{content['description']}\n")
-        md.write(f"\n")
+        md.write(f"\n")        
+        md.write(f"[{content['displayName']} Marketplace](https://marketplace.visualstudio.com/items?itemName=vrcomputing.qskinny)\n")        
+        # create table of content
+        md.write(f"# Table of content\n")
+        md.write('\n'.join(map(lambda c : f'- [{c}](#{c})', [
+            'Features', 
+            'Commands', 
+            'Settings', 
+            'Snippets'
+        ])))
+        md.write(f"\n") 
         md.write(f"# Features\n")
         md.write(f"- Transforming `QSK_SUBCONTROLS` or `QSK_STATES` declarations into initializations\n")
         md.write(f"\n")
@@ -40,7 +50,7 @@ with open(f"{os.getcwd()}/qskinny/package.json", "r") as input:
         md.write(f"|![]({gifroot}/qskinny.subcontrols.subcontrol.gif)|![]({gifroot}/qskinny.states.state.gif)|\n")
         md.write(f"\n")
         md.write(f"- Transforming `QSK_SUBCONTROLS` declarations into sequences of if/switch statements\n")
-        md.write(f"- Simple static code analysis for e.g. missing `Q_INVOKABLE` macro in skinlet declarations\n")
+        md.write(f"- Simple static code analysis for e.g. missing `Q_INVOKABLE` or `Q_GADGET` macro in skinlet declarations\n")
         md.write(f"\n")
         md.write(f"![]({gifroot}/qskinny.missing.qinvokable.quickfix.gif)\n")
         md.write(f"\n")
@@ -72,7 +82,7 @@ with open(f"{os.getcwd()}/qskinny/package.json", "r") as input:
             md.write(f"![./doc/{command['command']}]({gifroot}/{command['command']}.gif)\n")
             md.write("\n")
 
-        md.write(f"# Extension Settings\n")
+        md.write(f"# Settings\n")
         md.write(f"\n")
         md.write(f"|ID|Type|Default|Description|\n")
         md.write(f"|-|-|-|-|\n")
