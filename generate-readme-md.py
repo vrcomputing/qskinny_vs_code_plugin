@@ -18,6 +18,7 @@ def highlightTokens(text : str):
     return text
 
 gifroot = "https://github.com/vrcomputing/qskinny_vs_code_plugin/raw/main/qskinny/doc"
+snippetroot = "https://github.com/vrcomputing/qskinny_vs_code_plugin/raw/main/qskinny/snippets"
 txtroot= f"{os.getcwd()}/qskinny/doc".replace("\\", "/")
 
 with open(f"{os.getcwd()}/qskinny/package.json", "r") as input:
@@ -78,5 +79,26 @@ with open(f"{os.getcwd()}/qskinny/package.json", "r") as input:
         properties = content.get('contributes', {}).get('configuration', {}).get('properties', {})
         for property_name, property_value in properties.items():
             md.write(f"|{property_name}|{property_value['type']}|{property_value['default']}|{property_value['description']}|\n")
+        md.write(f"\n")
+
+        md.write(f"# Snippets\n")
+        md.write(f"\n")
+        # list all snippet files
+        for snippetFilename in ["template"]:
+            md.write(f"[./scripts/{snippetFilename}.json]({snippetroot}/{snippetFilename}.json)\n")
+            md.write(f"\n")
+        # list all snippets from all files
+        for snippetFilename in ["template"]:
+            with open(f"{os.getcwd()}/qskinny/snippets/{snippetFilename}.json", "r") as snippetsFile:
+                content = json.load(snippetsFile)
+                for snippet_name, snippet_value in content.items():
+                    prefixes = ', '.join(snippet_value['prefix'])
+                    md.write(f"## {snippet_name}\n")
+                    md.write(f"\n")
+                    md.write(f"{snippet_value['description']}.\n")
+                    md.write(f"See: [./scripts/{snippetFilename}.json]({snippetroot}/{snippetFilename}.json)\n")
+                    md.write(f"\n")
+                    md.write(f"__Usage:__ Type one of the following prefixes: `{prefixes}`\n")                    
+                    md.write(f"\n")
 
         pass

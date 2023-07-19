@@ -325,3 +325,36 @@ __Output__
 |ID|Type|Default|Description|
 |-|-|-|-|
 |qskinny.advancedCommands|boolean|False|Enable advanced commands|
+
+# Snippets
+
+[./scripts/template.json](https://github.com/vrcomputing/qskinny_vs_code_plugin/raw/main/qskinny/snippets/template.json)
+
+## Insert 'QskSkinnable' declaration
+
+Inserts a QSkinny template declaration of a simple control with a colored background and text subcontrol.
+See: [./scripts/template.json](https://github.com/vrcomputing/qskinny_vs_code_plugin/raw/main/qskinny/snippets/template.json)
+
+__Usage:__ Type one of the following prefixes: `QSK: Skinnable Declaration`
+
+## Insert 'QskSkinnable' implementation
+
+Inserts a QSkinny template implementation of a simple control with a colored background and text subcontrol.
+See: [./scripts/template.json](https://github.com/vrcomputing/qskinny_vs_code_plugin/raw/main/qskinny/snippets/template.json)
+
+__Usage:__ Type one of the following prefixes: `QSK: Skinnable Implementation`
+
+## Insert 'QskSkinlet' declaration
+
+Inserts a QSkinny template declaration of a simple skinlet with a colored background and text subcontrol.
+See: [./scripts/template.json](https://github.com/vrcomputing/qskinny_vs_code_plugin/raw/main/qskinny/snippets/template.json)
+
+__Usage:__ Type one of the following prefixes: `QSK: Skinlet Declaration`
+
+## Insert 'QskSkinlet' implementation
+
+Inserts a QSkinny template implementation of a simple skinlet with a colored background and text subcontrol.
+See: [./scripts/template.json](https://github.com/vrcomputing/qskinny_vs_code_plugin/raw/main/qskinny/snippets/template.json)
+
+__Usage:__ Type one of the following prefixes: `QSK: Skinlet Implementation`
+
