@@ -1,7 +1,7 @@
 {
     "Insert 'QskSkinnable' declaration": {
         "prefix": [
-            "QSK Skinnable Declaration"
+            "QSK: Skinnable Declaration"
         ],
         "body": [
             "#pragma once",
@@ -15,11 +15,11 @@
             "\texplicit ${1:ExampleControl}( QQuickItem* parent = nullptr );",
             "};"
         ],
-        "description": "TODO"
+        "description": "Inserts a QSkinny template declaration of a simple control with a colored background and text subcontrol"
     },
     "Insert 'QskSkinnable' implementation": {
         "prefix": [
-            "QSK Skinnable Implementation"
+            "QSK: Skinnable Implementation"
         ],
         "body": [
             "#include \"${1:ExampleControl}.h\"",
@@ -37,11 +37,11 @@
             "",
             "#include \"moc_${1:ExampleControl}.cpp\""
         ],
-        "description": "TODO"
+        "description": "Inserts a QSkinny template implementation of a simple control with a colored background and text subcontrol"
     },
     "Insert 'QskSkinlet' declaration": {
         "prefix": [
-            "QSK Skinlet Declaration"
+            "QSK: Skinlet Declaration"
         ],
         "body": [
             "#pragma once",
@@ -66,11 +66,11 @@
             "\tQ_REQUIRED_RESULT QSGNode* updateSubNode( const QskSkinnable* skinnable, quint8 nodeRole, QSGNode* node) const override;",
             "};"
         ],
-        "description": "TODO"
+        "description": "Inserts a QSkinny template declaration of a simple skinlet with a colored background and text subcontrol"
     },
     "Insert 'QskSkinlet' implementation": {
         "prefix": [
-            "QSK Skinlet Implementation"
+            "QSK: Skinlet Implementation"
         ],
         "body": [
             "#include \"${1:ExampleControl}Skinlet.h\"",
@@ -112,6 +112,6 @@
             "",
             "#include \"moc_${1:ExampleControl}Skinlet.cpp\""
         ],
-        "description": "TODO"
+        "description": "Inserts a QSkinny template implementation of a simple skinlet with a colored background and text subcontrol"
     }
 }
