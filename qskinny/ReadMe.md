@@ -6,6 +6,12 @@
 
 This extension provides usefull commands to accelerate QSkinny / C++ code generation
 
+[QSkinny Marketplace](https://marketplace.visualstudio.com/items?itemName=vrcomputing.qskinny)
+# Table of content
+- [Features](#Features)
+- [Commands](#Commands)
+- [Settings](#Settings)
+- [Snippets](#Snippets)
 # Features
 - Transforming `QSK_SUBCONTROLS` or `QSK_STATES` declarations into initializations
 
@@ -14,7 +20,7 @@ This extension provides usefull commands to accelerate QSkinny / C++ code genera
 |![](https://github.com/vrcomputing/qskinny_vs_code_plugin/raw/main/qskinny/doc/qskinny.subcontrols.subcontrol.gif)|![](https://github.com/vrcomputing/qskinny_vs_code_plugin/raw/main/qskinny/doc/qskinny.states.state.gif)|
 
 - Transforming `QSK_SUBCONTROLS` declarations into sequences of if/switch statements
-- Simple static code analysis for e.g. missing `Q_INVOKABLE` macro in skinlet declarations
+- Simple static code analysis for e.g. missing `Q_INVOKABLE` or `Q_GADGET` macro in skinlet declarations
 
 ![](https://github.com/vrcomputing/qskinny_vs_code_plugin/raw/main/qskinny/doc/qskinny.missing.qinvokable.quickfix.gif)
 
@@ -320,7 +326,7 @@ __Output__
 
 ![./doc/qskinny.noderoles.template.tutorial](https://github.com/vrcomputing/qskinny_vs_code_plugin/raw/main/qskinny/doc/qskinny.noderoles.template.tutorial.gif)
 
-# Extension Settings
+# Settings
 
 |ID|Type|Default|Description|
 |-|-|-|-|
